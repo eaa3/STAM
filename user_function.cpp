@@ -188,7 +188,7 @@ void user_function(Mat search_img, Mat pM)
 
             //imshow("search img", search_img);
             //imshow("result img", result_img);
-            //waitKey(1);
+            //waitKey(0);
 
 		}
 	}

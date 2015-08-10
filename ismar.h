@@ -22,9 +22,9 @@
 #define CV_EXT_STR ".lib"
 #endif
 
-#pragma comment (lib, "C:\\Program Files\\opencv\\build\\x86\\vc12\\lib\\opencv_core" CV_VERSION_STR CV_EXT_STR)
-#pragma comment (lib, "C:\\Program Files\\opencv\\build\\x86\\vc12\\lib\\opencv_highgui" CV_VERSION_STR CV_EXT_STR)
-#pragma comment (lib, "C:\\Program Files\\opencv\\build\\x86\\vc12\\lib\\opencv_imgproc" CV_VERSION_STR CV_EXT_STR)
+//#pragma comment (lib, "C:\\Program Files\\opencv\\build\\x86\\vc12\\lib\\opencv_core" CV_VERSION_STR CV_EXT_STR)
+//#pragma comment (lib, "C:\\Program Files\\opencv\\build\\x86\\vc12\\lib\\opencv_highgui" CV_VERSION_STR CV_EXT_STR)
+//#pragma comment (lib, "C:\\Program Files\\opencv\\build\\x86\\vc12\\lib\\opencv_imgproc" CV_VERSION_STR CV_EXT_STR)
 
 // for using OpenCV3.0, this code is necessary.
 //#pragma comment (lib, "C:\\Program Files\\opencv\\build\\x86\\vc12\\lib\\opencv_world" CV_VERSION_STR CV_EXT_STR)

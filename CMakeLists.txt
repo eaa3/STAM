@@ -34,10 +34,25 @@ find_package( OpenCV REQUIRED )
 #########################################################
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
-set(LEVEL2_INC ismar.h)
-set(LEVEL2_SRC user_function.cpp)
+set(LEVEL2_INC_DIR "include")
+set(LEVEL2_SRC_DIR "src")
+
+include_directories( ${LEVEL2_INC_DIR} )
+
+set(LEVEL2_INC ismar.h "${LEVEL2_INC_DIR}/VOodoometry.h"
+                       "${LEVEL2_INC_DIR}/types.h"
+                       "${LEVEL2_INC_DIR}/utils.h"
+
+    )
+
+set(LEVEL2_SRC user_function.cpp "${LEVEL2_SRC_DIR}/VOodoometry.cpp"
+                                 "${LEVEL2_SRC_DIR}/types.cpp"
+                                 "${LEVEL2_SRC_DIR}/utils.cpp"
+
+   )
 
 add_executable( level2 main2.cpp ${LEVEL2_INC} ${LEVEL2_SRC})
+
 target_link_libraries( level2 ${OpenCV_LIBS})
 #${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${CMAKE_THREAD_LIBS_INIT}  )
 
