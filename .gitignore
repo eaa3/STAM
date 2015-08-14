@@ -2,3 +2,4 @@ build
 S01L02_VGA_patch
 S01L02_VGA
 .DS_Store
+CMakeLists.txt.user

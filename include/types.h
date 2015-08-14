@@ -58,15 +58,18 @@ class Memory {
 
 public:
 
-    typedef std::map<int, Feature> MemMap;
+    typedef std::map<int, Feature> FeatMap;
+    typedef std::map<int, cv::Mat> ProjMap;
 
-    MemMap memory_;
+    FeatMap feature_memory_;
+    ProjMap pose_memory_;
 
     // Receives other memory, makes data association
     //and returns matched features ready to use for pose estimation (memmap_out)
-    void add(const Memory& other, MemMap& memmap_out);
+    void add(const Memory& other, FeatMap& featmap_out);
 
-    void update(const Memory& other);
+    // This function will triangulate
+    void update(const cv::Mat& new_proj);
 
 
 
