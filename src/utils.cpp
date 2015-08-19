@@ -17,35 +17,16 @@ void DataSpotMatcher::match(DataSpot3D::DataSpot3DPtr spot_src, DataSpot3D::Data
 }
 */
 
+
 // Match feature points using symmetry test and RANSAC
 // returns fundemental matrix
-cv::Mat GenericMatcher::match(cv::Mat& image1,
-                              cv::Mat& image2, // input images
+cv::Mat GenericMatcher::match(const cv::Mat& descriptors1,
+                              const cv::Mat& descriptors2, // input descriptors
                               // output matches and keypoints
                               std::vector<cv::DMatch>& matches,
                               std::vector<cv::KeyPoint>& keypoints1,
                               std::vector<cv::KeyPoint>& keypoints2) {
-    // 1a. Detection of the SURF features
-    if( !keypoints1.size() ) detector_->detect(image1,keypoints1);
-    if( !keypoints2.size() ) detector_->detect(image2,keypoints2);
 
-    if( keypoints1.size() <= 10 || keypoints2.size() <= 10)
-        return cv::Mat();
-
-    // 1b. Extraction of the SURF descriptors
-    cv::Mat descriptors1, descriptors2;
-    extractor_->compute(image1,keypoints1,descriptors1);
-    extractor_->compute(image2,keypoints2,descriptors2);
-    // 2. Match the two image descriptors
-    // Construction of the matcher
-
-    if(descriptors1.type()!=CV_32F) {
-        descriptors1.convertTo(descriptors1, CV_32F);
-    }
-
-    if(descriptors2.type()!=CV_32F) {
-        descriptors2.convertTo(descriptors2, CV_32F);
-    }
 
     cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased"); // alternative: "BruteForce" FlannBased
 
@@ -77,6 +58,42 @@ cv::Mat GenericMatcher::match(cv::Mat& image1,
                                      keypoints1, keypoints2, matches);
     // return the found fundemental matrix
     return fundemental;
+
+}
+
+// Match feature points using symmetry test and RANSAC
+// returns fundemental matrix
+cv::Mat GenericMatcher::match(cv::Mat& image1,
+                              cv::Mat& image2, // input images
+                              // output matches and keypoints
+                              std::vector<cv::DMatch>& matches,
+                              std::vector<cv::KeyPoint>& keypoints1,
+                              std::vector<cv::KeyPoint>& keypoints2) {
+    // 1a. Detection of the SURF features
+    if( !keypoints1.size() ) detector_->detect(image1,keypoints1);
+    if( !keypoints2.size() ) detector_->detect(image2,keypoints2);
+
+    if( keypoints1.size() <= 10 || keypoints2.size() <= 10)
+        return cv::Mat();
+
+    // 1b. Extraction of the SURF descriptors
+    cv::Mat descriptors1, descriptors2;
+    extractor_->compute(image1,keypoints1,descriptors1);
+    extractor_->compute(image2,keypoints2,descriptors2);
+    // 2. Match the two image descriptors
+    // Construction of the matcher
+
+    if(descriptors1.type()!=CV_32F) {
+        descriptors1.convertTo(descriptors1, CV_32F);
+    }
+
+    if(descriptors2.type()!=CV_32F) {
+        descriptors2.convertTo(descriptors2, CV_32F);
+    }
+
+
+    return match(descriptors1, descriptors2, matches, keypoints1, keypoints2);
+
 }
 
 

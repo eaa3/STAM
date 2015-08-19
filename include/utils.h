@@ -60,6 +60,13 @@ private:
                   std::vector<cv::KeyPoint>& keypoints1,
                   std::vector<cv::KeyPoint>& keypoints2);
 
+    cv::Mat match(const cv::Mat& descriptors1,
+                  const cv::Mat& descriptors2, // input descriptors
+                    // (output) matches and (input) keypoints
+                  std::vector<cv::DMatch>& matches,
+                  std::vector<cv::KeyPoint>& keypoints1,
+                  std::vector<cv::KeyPoint>& keypoints2);
+
 
     // Clear matches for which NN ratio is > than threshold
     // return the number of removed points
