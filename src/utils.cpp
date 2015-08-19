@@ -28,7 +28,8 @@ cv::Mat GenericMatcher::match(const cv::Mat& descriptors1,
                               std::vector<cv::KeyPoint>& keypoints2) {
 
 
-    cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased"); // alternative: "BruteForce" FlannBased
+    //cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased"); // alternative: "BruteForce" FlannBased
+	cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("BruteForce"); // alternative: "BruteForce" FlannBased
 
     // from image 1 to image 2
     // based on k nearest neighbours (with k=2)
@@ -52,10 +53,11 @@ cv::Mat GenericMatcher::match(const cv::Mat& descriptors1,
     removed= ratioTest(matches2);
     // 4. Remove non-symmetrical matches
     std::vector<cv::DMatch> symMatches;
-    symmetryTest(matches1,matches2,symMatches);
+    //symmetryTest(matches1,matches2,symMatches);
+	symmetryTest(matches1, matches2, matches);
     // 5. Validate matches using RANSAC
-    cv::Mat fundemental = ransacTest(symMatches,
-                                     keypoints1, keypoints2, matches);
+	cv::Mat fundemental; //= ransacTest(symMatches,
+    //                                 keypoints1, keypoints2, matches);
     // return the found fundemental matrix
     return fundemental;
 
@@ -63,7 +65,7 @@ cv::Mat GenericMatcher::match(const cv::Mat& descriptors1,
 
 // Match feature points using symmetry test and RANSAC
 // returns fundemental matrix
-cv::Mat GenericMatcher::match(cv::Mat& image1,
+cv::Mat GenericMatcher::match2(cv::Mat& image1,
                               cv::Mat& image2, // input images
                               // output matches and keypoints
                               std::vector<cv::DMatch>& matches,
