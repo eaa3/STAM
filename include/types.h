@@ -66,6 +66,7 @@ public:
 
     // Receives other memory, makes data association
     //and returns matched features ready to use for pose estimation (memmap_out)
+	//TODO mudar Memory other pra FeatMap
     void add(const Memory& other, FeatMap& featmap_out);
 
     // This function will triangulate

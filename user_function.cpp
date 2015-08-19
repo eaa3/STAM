@@ -151,6 +151,7 @@ void user_function(Mat search_img, Mat pM)
 		// Read template images.
         char buf[256];
         sprintf(buf, "S01L02_patch/S01L02_VGA_patch_%04d.png", i);
+		//sprintf(buf, "S01L03_patch/S01L03_VGA_patch_%04d.png", i);
         Mat tmp_img = imread(buf);
 
 		// When no template image is available, quite this program.

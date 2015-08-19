@@ -47,7 +47,7 @@ using namespace std;
 #define N 40
 
 // Set the number of frames L of the video sequence (default 201).
-#define M 201
+#define M 481
 
 // Competitors edit this function. 
 void user_function(Mat search_img, Mat pM);

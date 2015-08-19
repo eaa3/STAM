@@ -14,10 +14,11 @@ namespace utils {
 // Matcher goes here
 class GenericMatcher {
 
+public:
 
     typedef std::vector<cv::DMatch> MatchSeq;
 
-    GenericMatcher() : ratio_(0.65f), refineF_(true),
+    GenericMatcher() : ratio_(0.75f), refineF_(true),
         confidence_(0.99), distance_(3.0) {
         // SURF is the default feature
         detector_ = new cv::StarFeatureDetector(32, 10, 18, 18, 20);//new cv::SurfFeatureDetector();
@@ -49,11 +50,11 @@ class GenericMatcher {
     //void match(DataSpot3D::DataSpot3DPtr spot_src, DataSpot3D::DataSpot3DPtr spot_target, std::vector<cv::DMatch>& matches);
 
 
-private:
+
 
     // Match feature points using symmetry test and RANSAC
     // returns fundemental matrix
-    cv::Mat match(cv::Mat& image1,
+    cv::Mat match2(cv::Mat& image1,
                   cv::Mat& image2, // input images
                   // output matches and keypoints
                   std::vector<cv::DMatch>& matches,

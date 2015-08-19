@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
 		// Read "S01L02_VGA_****.png" as a reference image.
 		char buf[256];
 		sprintf(buf, "S01L02_VGA/S01L02_VGA_%04d.png", k);
+		//sprintf(buf, "S01L03_VGA/S01L03_VGA_%04d.png", k);
 		Mat search_img = imread(buf);
 
 		// When the image is not available, quite this program.
