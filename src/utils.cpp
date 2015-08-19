@@ -1,5 +1,10 @@
 
+#include "utils.h"
+#include <iostream>
 
+namespace visual_odometry {
+
+namespace utils {
 
 // Generic Matcher
 
@@ -14,12 +19,12 @@ void DataSpotMatcher::match(DataSpot3D::DataSpot3DPtr spot_src, DataSpot3D::Data
 
 // Match feature points using symmetry test and RANSAC
 // returns fundemental matrix
-cv::Mat DataSpotMatcher::match(cv::Mat& image1,
-                               cv::Mat& image2, // input images
-                               // output matches and keypoints
-                               std::vector<cv::DMatch>& matches,
-                               std::vector<cv::KeyPoint>& keypoints1,
-                               std::vector<cv::KeyPoint>& keypoints2) {
+cv::Mat GenericMatcher::match(cv::Mat& image1,
+                              cv::Mat& image2, // input images
+                              // output matches and keypoints
+                              std::vector<cv::DMatch>& matches,
+                              std::vector<cv::KeyPoint>& keypoints1,
+                              std::vector<cv::KeyPoint>& keypoints2) {
     // 1a. Detection of the SURF features
     if( !keypoints1.size() ) detector_->detect(image1,keypoints1);
     if( !keypoints2.size() ) detector_->detect(image2,keypoints2);
@@ -42,21 +47,21 @@ cv::Mat DataSpotMatcher::match(cv::Mat& image1,
         descriptors2.convertTo(descriptors2, CV_32F);
     }
 
-     cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased"); // alternative: "BruteForce" FlannBased
+    cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased"); // alternative: "BruteForce" FlannBased
 
     // from image 1 to image 2
     // based on k nearest neighbours (with k=2)
     std::vector< std::vector<cv::DMatch> > matches1;
     matcher->knnMatch(descriptors1,descriptors2,
-                     matches1, // vector of matches (up to 2 per entry)
-                     2);
+                      matches1, // vector of matches (up to 2 per entry)
+                      2);
     // return 2 nearest neighbours
     // from image 2 to image 1
     // based on k nearest neighbours (with k=2)
     std::vector< std::vector<cv::DMatch> > matches2;
     matcher->knnMatch(descriptors2,descriptors1,
-                     matches2, // vector of matches (up to 2 per entry)
-                     2);
+                      matches2, // vector of matches (up to 2 per entry)
+                      2);
     // return 2 nearest neighbours
     // 3. Remove matches for which NN ratio is
     // > than threshold
@@ -69,7 +74,7 @@ cv::Mat DataSpotMatcher::match(cv::Mat& image1,
     symmetryTest(matches1,matches2,symMatches);
     // 5. Validate matches using RANSAC
     cv::Mat fundemental = ransacTest(symMatches,
-                                    keypoints1, keypoints2, matches);
+                                     keypoints1, keypoints2, matches);
     // return the found fundemental matrix
     return fundemental;
 }
@@ -79,7 +84,7 @@ cv::Mat DataSpotMatcher::match(cv::Mat& image1,
 // return the number of removed points
 // (corresponding entries being cleared,
 // i.e. size will be 0)
-int DataSpotMatcher::ratioTest(std::vector<std::vector< cv::DMatch> >& matches) {
+int GenericMatcher::ratioTest(std::vector<std::vector< cv::DMatch> >& matches) {
     int removed=0;
     // for all matches
     for (std::vector<std::vector< cv::DMatch> >::iterator
@@ -102,7 +107,7 @@ int DataSpotMatcher::ratioTest(std::vector<std::vector< cv::DMatch> >& matches) 
 }
 
 // Insert symmetrical matches in symMatches vector
-void DataSpotMatcher::symmetryTest(
+void GenericMatcher::symmetryTest(
         const std::vector<std::vector< cv::DMatch> >& matches1,
         const std::vector<std::vector< cv::DMatch> >& matches2,
         std::vector<cv::DMatch>& symMatches) {
@@ -129,8 +134,8 @@ void DataSpotMatcher::symmetryTest(
                 // add symmetrical match
                 symMatches.push_back(
                             cv::DMatch((*matchIterator1)[0].queryIdx,
-                                       (*matchIterator1)[0].trainIdx,
-                                       (*matchIterator1)[0].distance));
+                            (*matchIterator1)[0].trainIdx,
+                        (*matchIterator1)[0].distance));
                 break; // next match in image 1 -> image 2
             }
         }
@@ -139,7 +144,7 @@ void DataSpotMatcher::symmetryTest(
 
 // Identify good matches using RANSAC
 // Return fundemental matrix
-cv::Mat DataSpotMatcher::ransacTest(
+cv::Mat GenericMatcher::ransacTest(
         const std::vector<cv::DMatch>& matches,
         const std::vector<cv::KeyPoint>& keypoints1,
         const std::vector<cv::KeyPoint>& keypoints2,
@@ -223,3 +228,7 @@ cv::Mat DataSpotMatcher::ransacTest(
     }
     return fundemental;
 }
+
+
+} // utils namespace
+} // visual odometry namespace
