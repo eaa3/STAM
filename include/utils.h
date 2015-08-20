@@ -69,6 +69,7 @@ public:
                   std::vector<cv::KeyPoint>& keypoints2);
 
 
+
     // Clear matches for which NN ratio is > than threshold
     // return the number of removed points
     // (corresponding entries being cleared,
