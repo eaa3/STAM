@@ -7,6 +7,9 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/nonfree/nonfree.hpp>
 
+
+void CalcProjectionMatrix(const std::vector<cv::Point3f>& pt_3d, const std::vector<cv::Point2f>& pt_2d, cv::Mat pM);
+
 namespace visual_odometry {
 
 namespace utils {
@@ -69,6 +72,7 @@ public:
                   std::vector<cv::KeyPoint>& keypoints2);
 
 
+
     // Clear matches for which NN ratio is > than threshold
     // return the number of removed points
     // (corresponding entries being cleared,
@@ -104,15 +108,7 @@ public:
 };
 
 
-// Generic Feature Extractor
-class GenericExtractor {
 
-public:
-
-    void extract(const cv::Mat& frame,  visual_odometry::Memory& mem_out);
-
-
-};
 
 
 // Generic Pose Calculator

@@ -39,8 +39,8 @@ string type2str(int type) {
 
 int main() {
 
-	cvNamedWindow("frame", CV_WINDOW_NORMAL);
-	cvSetWindowProperty("frame", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+    //cvNamedWindow("frame", CV_WINDOW_NORMAL);
+    //cvSetWindowProperty("frame", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
 
 	/*cvNamedWindow("lbp", CV_WINDOW_NORMAL);
 	cvSetWindowProperty("lbp", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);*/
@@ -62,7 +62,7 @@ int main() {
 	//Mat grayscale;
 	//Mat lbp;
 
-	char buf[256];
+    char buf[256];
 	sprintf(buf, "S01L03_VGA/S01L03_VGA_%04d.png", 0);
 	Mat search_img = imread(buf);
 	//GaussianBlur(search_img, search_img, Size(3, 3), 0, 0);
@@ -101,16 +101,14 @@ int main() {
 
 	for (int k = 1; k < M; k++)
 	{
+        char buf[256];
 		// --------------------------------------
 		// Read "S01L02_VGA_****.png" as a reference image.
 		sprintf(buf, "S01L03_VGA/S01L03_VGA_%04d.png", k);
+        printf("reading image\n");
 		//sprintf(buf, "S01L03_VGA/S01L03_VGA_%04d.png", k);
 		search_img = imread(buf);
-		//GaussianBlur(search_img, search_img, Size(3, 3), 0, 0);
-		//cvtColor(search_img, grayscale, CV_BGR2GRAY);
-		//lbp::OLBP(grayscale, lbp);
-		//lbp::ELBP(grayscale, lbp, 3, 24);
-		//lbp::VARLBP(grayscale, lbp, 1, 8);
+        printf(" image read\n");
 
 		// When the image is not available, quite this program.
 		if (search_img.empty())
@@ -119,17 +117,18 @@ int main() {
 			return -1;
 		}
 
-		keypoints1 = keypoints2;
-		keypoints2.clear();
-		detector->detect(search_img, keypoints2);
+        keypoints1 = keypoints2;
+        keypoints2.clear();
+        detector->detect(search_img, keypoints2);
 		/*for (int i = 0; i < keypoints2.size(); i++) {
 			circle(search_img, keypoints[i].pt, 2, Scalar(255, 255, 255), -1);
 		}*/
 
-		descriptors1 = descriptors2;
-		descriptor->compute(search_img, keypoints2, descriptors2);
+        descriptors1 = descriptors2;
 
-		//matcher->match(descriptors2, descriptors1, matches);
+        descriptor->compute(search_img, keypoints2, descriptors2);
+
+        //matcher->match(descriptors2, descriptors1, matches);
 		//printf("%d\n", matches.size());
 		
 		matches.clear();
@@ -141,22 +140,22 @@ int main() {
 
 		//int counter = 0;
 		
-		for (int i = 0; i < matches.size(); i++) {
-			//printf("%f\n", matches[i].distance);
-			CvPoint pt2 = keypoints2[matches[i].queryIdx].pt;
-			CvPoint pt1 = keypoints1[matches[i].trainIdx].pt;
+        for (int i = 0; i < matches.size(); i++) {
+            //printf("%f\n", matches[i].distance);
+            CvPoint pt2 = keypoints2[matches[i].trainIdx].pt;
+            CvPoint pt1 = keypoints1[matches[i].queryIdx].pt;
 			
-			float distance = sqrtf((pt1.x - pt2.x)*(pt1.x - pt2.x) + (pt1.y - pt2.y)*(pt1.y - pt2.y));
-			if (distance < 20) {
-				circle(search_img, keypoints2[matches[i].queryIdx].pt, 2, Scalar(0, 255, 0), -1);
-				//counter++;
-				line(search_img, pt2, pt1, Scalar(0, 0, 0));
-			}
-			//else {
-				//line(search_img, pt2, pt1, Scalar(0, 0, 255));
-			//}
+            float distance = sqrtf((pt1.x - pt2.x)*(pt1.x - pt2.x) + (pt1.y - pt2.y)*(pt1.y - pt2.y));
+            if (distance < 20) {
+                circle(search_img, keypoints2[matches[i].queryIdx].pt, 2, Scalar(0, 255, 0), -1);
+                //counter++;
+                line(search_img, pt2, pt1, Scalar(0, 0, 0));
+            }
+            //else {
+            //    line(search_img, pt2, pt1, Scalar(0, 0, 255));
+            //}
 			
-		}
+        }
 		//std::cout << '\r';
 		//printf("%3d %3.2f\n", k, 100 * (float)counter/matches.size());
 
@@ -199,18 +198,18 @@ int main() {
 		//		}
 		//		/*else {
 		//			
-		//		}*/
+        //		}*/
 		//		search_img.at<Vec3b>(i, j) = pixel;
 		//	}
 		//}
 
-
-		imshow("frame", search_img);
-		//imshow("lbp", lbp);
-		int c = cvWaitKey(0);
+        printf("Show image\n");
+        imshow("frame", search_img);
+        cv::waitKey(0);
+        //int c = cvWaitKey(0);
 		//printf("%d\n", c);
 
-		if (c == 2424832) k -= 2;
+        //if (c == 2424832) k -= 2;
 
 		//Mat pM(3, 4, CV_64FC1);
 

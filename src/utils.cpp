@@ -27,13 +27,22 @@ cv::Mat GenericMatcher::match(const cv::Mat& descriptors1,
                               std::vector<cv::KeyPoint>& keypoints1,
                               std::vector<cv::KeyPoint>& keypoints2) {
 
+    if(descriptors1.type()!=CV_32F) {
+        descriptors1.convertTo(descriptors1, CV_32F);
+    }
+
+    if(descriptors2.type()!=CV_32F) {
+        descriptors2.convertTo(descriptors2, CV_32F);
+    }
+
 
     //cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased"); // alternative: "BruteForce" FlannBased
-	cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("BruteForce"); // alternative: "BruteForce" FlannBased
+    cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased"); // alternative: "BruteForce" FlannBased
 
     // from image 1 to image 2
     // based on k nearest neighbours (with k=2)
     std::vector< std::vector<cv::DMatch> > matches1;
+
     matcher->knnMatch(descriptors1,descriptors2,
                       matches1, // vector of matches (up to 2 per entry)
                       2);
@@ -53,15 +62,16 @@ cv::Mat GenericMatcher::match(const cv::Mat& descriptors1,
     removed= ratioTest(matches2);
     // 4. Remove non-symmetrical matches
     std::vector<cv::DMatch> symMatches;
-    //symmetryTest(matches1,matches2,symMatches);
-	symmetryTest(matches1, matches2, matches);
+    symmetryTest(matches1,matches2,symMatches);
+    //symmetryTest(matches1, matches2, matches);
     // 5. Validate matches using RANSAC
-	cv::Mat fundemental; //= ransacTest(symMatches,
-    //                                 keypoints1, keypoints2, matches);
+    cv::Mat fundemental = ransacTest(symMatches,
+                                      keypoints1, keypoints2, matches);
     // return the found fundemental matrix
     return fundemental;
 
 }
+
 
 // Match feature points using symmetry test and RANSAC
 // returns fundemental matrix
@@ -84,14 +94,6 @@ cv::Mat GenericMatcher::match2(cv::Mat& image1,
     extractor_->compute(image2,keypoints2,descriptors2);
     // 2. Match the two image descriptors
     // Construction of the matcher
-
-    if(descriptors1.type()!=CV_32F) {
-        descriptors1.convertTo(descriptors1, CV_32F);
-    }
-
-    if(descriptors2.type()!=CV_32F) {
-        descriptors2.convertTo(descriptors2, CV_32F);
-    }
 
 
     return match(descriptors1, descriptors2, matches, keypoints1, keypoints2);

@@ -52,8 +52,13 @@ set(LEVEL2_SRC user_function.cpp "${LEVEL2_SRC_DIR}/VOodoometry.cpp"
    )
 
 add_executable( level2 main2.cpp ${LEVEL2_INC} ${LEVEL2_SRC})
+add_executable( test_level2 src/joma3.cpp ${LEVEL2_INC} ${LEVEL2_SRC})
+add_executable( demo_level2 main.cpp ${LEVEL2_INC} ${LEVEL2_SRC})
 
+target_link_libraries( demo_level2 ${OpenCV_LIBS})
+target_link_libraries( test_level2 ${OpenCV_LIBS})
 target_link_libraries( level2 ${OpenCV_LIBS})
+
 #${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${CMAKE_THREAD_LIBS_INIT}  )
 
 

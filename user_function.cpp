@@ -11,6 +11,7 @@
 // ==============================================================================
 
 #include "ismar.h"
+#include "utils.h"
 
 // ---------------------------------------------------------------
 // Read .csv file as a numerical value.
@@ -54,7 +55,7 @@ void Read3DData(ifstream &ifs, int pt[][3])
 
 // ---------------------------------------------------------------
 // Estimate a projection matrix from 2D-3D correspondences using DLT algorithm.
-void CalcProjectionMatrix(vector<Point3f> pt_3d, vector<Point2f> pt_2d, Mat pM)
+void CalcProjectionMatrix(const vector<Point3f>& pt_3d, const vector<Point2f>& pt_2d, Mat pM)
 {
 	// When can't find 3D-data or 2D-data, quite this program.
 	if (pt_3d.empty() || pt_2d.empty())
