@@ -71,13 +71,14 @@ class FrameData {
 
 private:
     static Identifier next_id_s_;
+    static Identifier next_kp_id_s;
 
 public:
 
     typedef std::shared_ptr<FrameData> Ptr;
     typedef std::map<Identifier, FrameData::Ptr> FrameDataMap;
 
-    FrameData() : id_(next_id_s_++)  {
+    FrameData() : id_(next_id_s_++), cam_matrix_(cv::Mat(3, 4, CV_64FC1)) {
 
     }
     FrameData(const FrameData& other)  {
@@ -87,19 +88,23 @@ public:
         kps_ = other.kps_;
         points3D_ = other.points3D_;
         points2D_ = other.points2D_;
+        cam_matrix_ = other.cam_matrix_;
+
 
     }
 
     FrameData(cv::Mat img, cv::Mat desc,
               const std::vector< cv::KeyPoint >& kps,
               const std::vector< cv::Point2f >& points2D,
-              const std::vector< cv::Point3f >&  points3D) :  id_(next_id_s_++), img_(img), desc_(desc), kps_(kps), points2D_(points2D), points3D_(points3D)
+              const std::vector< cv::Point3f >&  points3D) :
+        id_(next_id_s_++), img_(img), desc_(desc), kps_(kps), cam_matrix_(cv::Mat(3, 4, CV_64FC1)),
+        points2D_(points2D), points3D_(points3D)
     {
 
 
     }
 
-    FrameData(cv::Mat img) :  id_(next_id_s_++), img_(img)
+    FrameData(cv::Mat img) :  id_(next_id_s_++), img_(img), cam_matrix_(cv::Mat(3, 4, CV_64FC1))
     {
 
     }
