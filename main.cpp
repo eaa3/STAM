@@ -109,6 +109,10 @@ int main() {
      curr_frame_data->addKeyPoints(detected_keypoints);
      curr_frame_data->describe(descriptor); // Updating description
 
+
+     keypoints2 = curr_frame_data->kps_;
+     descriptors2 = curr_frame_data->desc_.clone();
+
     //     *       coloca as features no frame atual
     //     *
     //     *       coloca as features do frame atual para o conjunto cumulativo
