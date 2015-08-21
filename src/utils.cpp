@@ -37,11 +37,12 @@ cv::Mat GenericMatcher::match(const cv::Mat& descriptors1,
 
 
     //cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased"); // alternative: "BruteForce" FlannBased
-	cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("BruteForce"); // alternative: "BruteForce" FlannBased
+    cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased"); // alternative: "BruteForce" FlannBased
 
     // from image 1 to image 2
     // based on k nearest neighbours (with k=2)
     std::vector< std::vector<cv::DMatch> > matches1;
+
     matcher->knnMatch(descriptors1,descriptors2,
                       matches1, // vector of matches (up to 2 per entry)
                       2);

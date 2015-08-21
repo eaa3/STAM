@@ -48,6 +48,9 @@ int main(int argc, char *argv[])
 		ofstream ofs("S0102_Matrix.csv", ios::trunc);
 		for (int i = 0; i < 3; i++)
 			ofs << pM.at<double>(i, 0) << "," << pM.at<double>(i, 1) << "," << pM.at<double>(i, 2) << "," << pM.at<double>(i, 3) << endl;
+	
+
+		cv::waitKey(0);
 	}
 	return 0;
 }
