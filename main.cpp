@@ -105,7 +105,11 @@ int main() {
     //     *
      detected_keypoints.clear();
      detector->detect(curr_frame_data->img_, detected_keypoints);
-    printf("Detected keypoints\n");
+	 for (int i = 0; i < detected_keypoints.size(); i++) {
+		 printf("%f\n", detected_keypoints[i].size);
+	 }
+	 	 
+	 printf("Detected keypoints\n");
      curr_frame_data->addKeyPoints(detected_keypoints);
      curr_frame_data->describe(descriptor); // Updating description
 

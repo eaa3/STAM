@@ -32,7 +32,7 @@ find_package( OpenCV REQUIRED )
 ########################################################
 # Linking & stuff
 #########################################################
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(LEVEL2_INC_DIR "include")
 set(LEVEL2_SRC_DIR "src")

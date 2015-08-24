@@ -193,7 +193,7 @@ cv::Mat GenericMatcher::ransacTest(
         return cv::Mat();
     }
 
-    std::cout << " Computing F with NPoints: " << std::min(points1.size(), points2.size()) <<  std::endl;
+    //std::cout << " Computing F with NPoints: " << std::min(points1.size(), points2.size()) <<  std::endl;
     // Compute F matrix using RANSAC
     std::vector<uchar> inliers(points1.size(),0);
     cv::Mat fundemental= cv::findFundamentalMat(
@@ -241,7 +241,7 @@ cv::Mat GenericMatcher::ransacTest(
             return cv::Mat();
         }
 
-        std::cout << " Re-computing F " << std::endl;
+        //std::cout << " Re-computing F " << std::endl;
         // Compute 8-point F from all accepted matches
         fundemental= cv::findFundamentalMat(
                     cv::Mat(points1),cv::Mat(points2), // matches
