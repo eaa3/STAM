@@ -60,7 +60,7 @@ public:
 		vector<cv::Point3f> points3d;
 		vector<cv::Point2f> points2d;
 
-        for (int i = std::max<int>(0,(squareFeatures.size()-100)); i < squareFeatures.size(); i++) {
+        for (int i = std::max<int>(0,(squareFeatures.size()-80)); i < squareFeatures.size(); i++) {
 			points3d.push_back(squareFeatures[i].p3D_);
 			points2d.push_back(squareFeatures[i].kp_.pt);
 		}
@@ -84,7 +84,7 @@ public:
         LOG("Number of Points %d\n", points3d.size());
 
         cv::Mat tvec, rvec;
-        cv::solvePnPRansac(points3d, points2d, intrinsic, distortion, rvec, tvec, false, 300, 8.0, 0.99);
+        cv::solvePnPRansac(points3d, points2d, intrinsic, distortion, rvec, tvec, false, 500, 8.0, 0.99);
 
         cv::Mat R;
         cv::Rodrigues(rvec, R);
@@ -352,7 +352,7 @@ int main() {
 		currentFrame.calcProjMatrix();
 		
 
-        bool enough_baseline = has_enough_baseline(keyFrame.intrinsic.inv()*keyFrame.projMatrix, currentFrame.intrinsic.inv()*currentFrame.projMatrix, 150);
+        bool enough_baseline = has_enough_baseline(keyFrame.intrinsic.inv()*keyFrame.projMatrix, currentFrame.intrinsic.inv()*currentFrame.projMatrix, 200);
 
         if (enough_baseline /*counter % 20 == 0*/) { // keyframe interval // change here from 5 to any other number
 			currentFrame.detectAndDescribe();
