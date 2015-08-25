@@ -11,6 +11,8 @@
 
 #include "types.h"
 
+#include <algorithm>
+
 using namespace std;
 using namespace visual_odometry;
 using namespace visual_odometry::utils;
@@ -58,7 +60,7 @@ public:
 		vector<cv::Point3f> points3d;
 		vector<cv::Point2f> points2d;
 
-		for (int i = 0; i < squareFeatures.size(); i++) {
+        for (int i = std::max<int>(0,(squareFeatures.size()-100)); i < squareFeatures.size(); i++) {
 			points3d.push_back(squareFeatures[i].p3D_);
 			points2d.push_back(squareFeatures[i].kp_.pt);
 		}
@@ -82,7 +84,7 @@ public:
         LOG("Number of Points %d\n", points3d.size());
 
         cv::Mat tvec, rvec;
-        cv::solvePnPRansac(points3d, points2d, intrinsic, distortion, rvec, tvec, false, 100, 8.0, 0.99);
+        cv::solvePnPRansac(points3d, points2d, intrinsic, distortion, rvec, tvec, false, 300, 8.0, 0.99);
 
         cv::Mat R;
         cv::Rodrigues(rvec, R);
@@ -255,6 +257,8 @@ void matchAndTriangulate(Frame& previousFrame, Frame& currentFrame, cv::Mat intr
 
 	matcher.match(currentFrame.descriptors, previousFrame.descriptors, matches, currentFrame.keypoints, previousFrame.keypoints);
 
+    LOG("NMatches %d\n",matches.size());
+
 	vector<cv::Point2f> previousTriangulate, currentTriangulate;
 	cv::Mat	outputTriangulate;
 	outputTriangulate.create(cv::Size(4, matches.size()), CV_32FC1);
@@ -266,6 +270,14 @@ void matchAndTriangulate(Frame& previousFrame, Frame& currentFrame, cv::Mat intr
 		previousTriangulate.push_back(pt1);
 		currentTriangulate.push_back(pt2);
 	}
+
+
+    if( previousTriangulate.size() == 0 || currentTriangulate.size() == 0 ){
+        //LOG("Triangulation Points %d %d\n",previousTriangulate.size(),currentTriangulate.size());
+        return;
+    }
+
+
 
 
     // undistort
