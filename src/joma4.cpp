@@ -23,7 +23,11 @@ using namespace visual_odometry::utils;
 
 class Frame {
 
+
+
 public:
+
+    static int next_id_s_;
 
 	Frame(int n) {
 		squareFeatures.resize(n);
@@ -55,12 +59,15 @@ public:
 	vector<cv::KeyPoint> keypoints;
 	cv::Mat descriptors;
 
+    int id_;
+
+
     void calcProjMatrix() {
 
 		vector<cv::Point3f> points3d;
 		vector<cv::Point2f> points2d;
 
-        for (int i = std::max<int>(0,(squareFeatures.size()-80)); i < squareFeatures.size(); i++) {
+        for (int i = std::max<int>(0,(squareFeatures.size()-40)); i < squareFeatures.size(); i++) {
 			points3d.push_back(squareFeatures[i].p3D_);
 			points2d.push_back(squareFeatures[i].kp_.pt);
 		}
@@ -84,7 +91,7 @@ public:
         LOG("Number of Points %d\n", points3d.size());
 
         cv::Mat tvec, rvec;
-        cv::solvePnPRansac(points3d, points2d, intrinsic, distortion, rvec, tvec, false, 500, 8.0, 0.99);
+        cv::solvePnPRansac(points3d, points2d, intrinsic, distortion, rvec, tvec, false, 100, 5.0, 0.99);
 
         cv::Mat R;
         cv::Rodrigues(rvec, R);
@@ -167,7 +174,7 @@ public:
 		static int findex = 0;
 		char buf[256];
 		sprintf(buf, "S01L03_VGA/S01L03_VGA_%04d.png", findex++);
-
+        id_ = next_id_s_++;
 		image = cv::imread(buf);
 		if (image.empty()) {
 			exit(0);
@@ -189,7 +196,7 @@ public:
 		cv::calcOpticalFlowPyrLK(previousFrame.image, image, previousPoints, currentPoints, status, errors);
 
 		for (int i = 0; i < previousPoints.size(); i++) {
-			if (status[i] != 0 /*&& errors.at<float>(i) < 4*/) { // klt ok!
+            if (status[i] != 0 && errors.at<float>(i) < 12.0f) { // klt ok!
 				Feature f;
 				f.kp_ = cv::KeyPoint(currentPoints[i].x, currentPoints[i].y, 1);
 				f.p3D_ = previousFrame.squareFeatures[i].p3D_;
@@ -220,8 +227,9 @@ public:
 		cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)), 2, cv::Scalar(0, 0, 255), -1);
 
 
-
-
+        float b = 100/(id_+1);
+        int bi = int(b*255);
+        //std::max<int>(0,(squareFeatures.size()-40))
         for(int i = 0; i < squareFeatures.size(); i++){
 
             point3D.at<double>(0) = squareFeatures[i].p3D_.x;
@@ -245,10 +253,12 @@ public:
         }
 
         cv::imshow("frame", imcopy);
-		if (cv::waitKey(0) == 27) exit(0);
+        if (cv::waitKey(1) == 27) exit(0);
 	}
 
 };
+
+int Frame::next_id_s_ = 0;
 
 void matchAndTriangulate(Frame& previousFrame, Frame& currentFrame, cv::Mat intrinsics, cv::Mat distortion) {
 	
@@ -352,7 +362,7 @@ int main() {
 		currentFrame.calcProjMatrix();
 		
 
-        bool enough_baseline = has_enough_baseline(keyFrame.intrinsic.inv()*keyFrame.projMatrix, currentFrame.intrinsic.inv()*currentFrame.projMatrix, 200);
+        bool enough_baseline = has_enough_baseline(keyFrame.intrinsic.inv()*keyFrame.projMatrix, currentFrame.intrinsic.inv()*currentFrame.projMatrix, 175);
 
         if (enough_baseline /*counter % 20 == 0*/) { // keyframe interval // change here from 5 to any other number
 			currentFrame.detectAndDescribe();
@@ -364,6 +374,7 @@ int main() {
 			keyFrame = currentFrame;
             // This is extremely important (otherwise all Frames will have a common projMatrix in the memory)
             keyFrame.projMatrix = currentFrame.projMatrix.clone();
+            keyFrame.descriptors = currentFrame.descriptors.clone();
 		}
 		
 		previousFrame = currentFrame;

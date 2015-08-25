@@ -21,7 +21,7 @@ public:
 
     typedef std::vector<cv::DMatch> MatchSeq;
 
-    GenericMatcher() : ratio_(0.65f), refineF_(true),
+    GenericMatcher() : ratio_(0.45f), refineF_(true),
         confidence_(0.99), distance_(2.0) {
         // SURF is the default feature
         detector_ = new cv::StarFeatureDetector(32, 10, 18, 18, 20);//new cv::SurfFeatureDetector();
