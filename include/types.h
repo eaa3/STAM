@@ -153,10 +153,16 @@ class Memory {
 public:
 
 
-    typedef std::map<int, cv::Mat> ProjMap;
+    typedef std::vector<cv::Point3d> PointCloud;
+    typedef std::vector<cv::Mat> Rs;
+    typedef std::vector<cv::Mat> Ts;
 
-    Feature::FeatMap feature_memory_;
-    ProjMap proj_memory_;
+    cv::Mat cameraMatrix, distCoeffs;
+
+    PointCloud point_cloud_;
+
+    //Feature::FeatMap feature_memory_;
+    //ProjMap proj_memory_;
 
     // Receives other memory, makes data association
     // and returns matched features ready to use for pose estimation (memmap_out)

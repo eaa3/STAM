@@ -21,6 +21,8 @@ public:
 
     typedef std::vector<cv::DMatch> MatchSeq;
 
+    // for S01:  ratio_(0.45f), refineF_(true),
+    // confidence_(0.99), distance_(2.0)
     GenericMatcher() : ratio_(0.45f), refineF_(true),
         confidence_(0.99), distance_(2.0) {
         // SURF is the default feature

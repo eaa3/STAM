@@ -129,7 +129,7 @@ void user_function(Mat search_img, Mat pM)
 	vector<Point2f> image_pt;
 
 	// --------------------------------------
-	ifstream ifs("S01_3Ddata.csv");
+    ifstream ifs("S03_3Ddata.csv");
 
 	// When no 3D-data is available, quite this program.
 	if (!ifs)
@@ -143,15 +143,15 @@ void user_function(Mat search_img, Mat pM)
 	// --------------------------------------
 	
 	// Output the 2D and 3D coordinate at the last frame.
-	ofstream pt_3d("S01_3Ddata_dst.csv", ios::trunc);
-	ofstream pt_2d("S01_2Ddata_dst.csv", ios::trunc);
+    ofstream pt_3d("S03_3Ddata_dst.csv", ios::trunc);
+    ofstream pt_2d("S03_2Ddata_dst.csv", ios::trunc);
 
 	for (int i = 0; i < N; i++)
 	{
 		// --------------------------------------
 		// Read template images.
         char buf[256];
-        sprintf(buf, "S01L02_patch/S01L02_VGA_patch_%04d.png", i);
+        sprintf(buf, "S03L03_VGA_patch/S03L03_VGA_patch_%04d.png", i);
 		//sprintf(buf, "S01L03_patch/S01L03_VGA_patch_%04d.png", i);
         Mat tmp_img = imread(buf);
 

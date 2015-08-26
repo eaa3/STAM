@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 		// --------------------------------------
 		// Read "S01L02_VGA_****.png" as a reference image.
 		char buf[256];
-		sprintf(buf, "S01L02_VGA/S01L02_VGA_%04d.png", k);
+        sprintf(buf, "S03L03_VGA/S03L03_VGA_%04d.png", k);
 		//sprintf(buf, "S01L03_VGA/S01L03_VGA_%04d.png", k);
 		Mat search_img = imread(buf);
 
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 		user_function(search_img, pM);
 
 		// Output the estimated projection matrix at the last frame.
-		ofstream ofs("S0102_Matrix.csv", ios::trunc);
+        ofstream ofs("S0303_Matrix.csv", ios::trunc);
 		for (int i = 0; i < 3; i++)
 			ofs << pM.at<double>(i, 0) << "," << pM.at<double>(i, 1) << "," << pM.at<double>(i, 2) << "," << pM.at<double>(i, 3) << endl;
 	

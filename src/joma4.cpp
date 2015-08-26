@@ -13,6 +13,25 @@
 
 #include <algorithm>
 
+#include <cvsba/cvsba.h>
+
+
+int SCENE = 1;
+
+
+double baseline[] = { 175, 50, 25 };
+std::string points2d_init_file[] = { "S01_2Ddata_dst_init.csv", "S02_2Ddata_dst_init.csv", "S03_2Ddata_dst_init.csv" };
+std::string points3d_init_file[] = { "S01_3Ddata_dst_init.csv", "S02_3Ddata_dst_init.csv", "S03_3Ddata_dst_init.csv" };
+std::string intrinsics_file[] = { "intrinsicsS01.xml", "intrinsicsS02.xml", "intrinsicsS03.xml" };
+std::string next_frame_fmt[] = { "S01L03_VGA/S01L03_VGA_%04d.png", "S02L03_VGA/S02L03_VGA_%04d.png", "S03L03_VGA/S03L03_VGA_%04d.png"};
+
+#define THR_BASELINE baseline[SCENE-1]
+#define POINTS_2D_INIT_FILE points2d_init_file[SCENE-1]
+#define POINTS_3D_INIT_FILE points3d_init_file[SCENE-1]
+#define INTRINSICS_FILE intrinsics_file[SCENE-1]
+#define NEXT_FRAME_FMT next_frame_fmt[SCENE-1].c_str()
+
+
 using namespace std;
 using namespace visual_odometry;
 using namespace visual_odometry::utils;
@@ -26,6 +45,8 @@ class Frame {
 
 
 public:
+
+    typedef std::shared_ptr<Frame> Ptr;
 
     static int next_id_s_;
 
@@ -49,6 +70,7 @@ public:
 	vector<Feature> squareFeatures;
 	vector<Feature> triangleFeatures;
 	cv::Mat projMatrix;
+    cv::Mat t, r;
 	
     // Intrinsics params
     cv::Mat intrinsic;   // intrinsic parameters
@@ -62,7 +84,7 @@ public:
     int id_;
 
 
-    void calcProjMatrix() {
+    void calcProjMatrix(cv::Mat guess_r = cv::Mat(), cv::Mat guess_t = cv::Mat()) {
 
 		vector<cv::Point3f> points3d;
 		vector<cv::Point2f> points2d;
@@ -90,9 +112,9 @@ public:
 
         LOG("Number of Points %d\n", points3d.size());
 
-        cv::Mat tvec, rvec;
+        cv::Mat tvec = guess_t, rvec = guess_r;
         cv::solvePnPRansac(points3d, points2d, intrinsic, distortion, rvec, tvec, false, 100, 5.0, 0.99);
-
+        //r = rvec; t = tvec;
         cv::Mat R;
         cv::Rodrigues(rvec, R);
 
@@ -173,7 +195,7 @@ public:
 
 		static int findex = 0;
 		char buf[256];
-		sprintf(buf, "S01L03_VGA/S01L03_VGA_%04d.png", findex++);
+        sprintf(buf, NEXT_FRAME_FMT, findex++);
         id_ = next_id_s_++;
 		image = cv::imread(buf);
 		if (image.empty()) {
@@ -237,10 +259,20 @@ public:
             point3D.at<double>(2) = squareFeatures[i].p3D_.z;
             point3D.at<double>(3) = 1;
 
+            cv::Mat p3D;
+            p3D.create(cv::Size(1, 4), CV_64FC1);
+            p3D.at<double>(0) = squareFeatures[i].p3D_.x;
+            p3D.at<double>(1) = squareFeatures[i].p3D_.y;
+            p3D.at<double>(2) = squareFeatures[i].p3D_.z;
+            p3D.at<double>(2) = 1;
+            cv::Mat p3DCam = (intrinsic.inv()*projMatrix)*p3D;
+
+            float r = 40.0/(abs(p3D.at<double>(1))+1);
+            int ri = 255*r;
             cv::gemm(projMatrix,  point3D , 1, 0, 0, result);
-            cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)),4,cv::Scalar(0,0,255),-1);
-            cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)), 3, cv::Scalar(255, 255, 255), -1);
-            cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)), 2, cv::Scalar(0, 0, 255), -1);
+            cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)),4,cv::Scalar(ri,0,255),-1);
+            cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)), 3, cv::Scalar(ri, 255, 255), -1);
+            cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)), 2, cv::Scalar(ri, 0, 255), -1);
 
 
 
@@ -327,56 +359,79 @@ bool has_enough_baseline(cv::Mat pose1, cv::Mat pose2, double thr_baseline){
 }
 
 
-int main() {
 
-    //cvNamedWindow("frame", CV_WINDOW_NORMAL);
-    //cvSetWindowProperty("frame", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+int main(int argc, char **argv) {
+
+    if( argc < 2 ){
+        printf("Usage: \n\n./demo_level3 <scene_number>\n attention: scene_number = 1|2|3\n\n");
+        exit(1);
+    }else{
+        SCENE = atoi(argv[1]);
+        if( SCENE < 1 || SCENE > 3 ){
+            printf("Usage: \n\n./demo_level3 <scene_number>\n attention: scene_number = 1|2|3\n\n");
+            exit(1);
+        }
+    }
+    cv::namedWindow("frame", CV_WINDOW_NORMAL);
+
 	
-    Frame previousFrame(40);
-    Frame currentFrame(40);
-    Frame keyFrame(40);
+    Frame::Ptr previousFrame(new Frame(40));
+    Frame::Ptr currentFrame(new Frame(40));
+    Frame::Ptr keyFrame(new Frame(40));
 
 	cv::initModule_nonfree();
 	
-	previousFrame.loadKpFromFile("S01_2Ddata_dst_init.csv");
-	previousFrame.load3DPointsFromFile("S01_3Ddata_dst_init.csv");
-    previousFrame.loadIntrinsicsFromFile("intrinsics.xml");
-    currentFrame.loadIntrinsicsFromFile("intrinsics.xml");
+    previousFrame->loadKpFromFile(POINTS_2D_INIT_FILE);
+    previousFrame->load3DPointsFromFile(POINTS_3D_INIT_FILE);
+    previousFrame->loadIntrinsicsFromFile(INTRINSICS_FILE);
+    currentFrame->loadIntrinsicsFromFile(INTRINSICS_FILE);
 
-	previousFrame.readNextFrame();
+    previousFrame->readNextFrame();
 
-	previousFrame.calcProjMatrix();
+    previousFrame->calcProjMatrix();
 	
-    previousFrame.detectAndDescribe();
+    previousFrame->detectAndDescribe();
 
 	keyFrame = previousFrame;
+
+    //std::vector<Frame> frames;
+
 
 	int counter = 1;
 
 	while (true) {
+        currentFrame = Frame::Ptr(new Frame(*previousFrame));
 
-		currentFrame.readNextFrame();
+        currentFrame->readNextFrame();
 
-		currentFrame.updateUsingKLT(previousFrame);
+        currentFrame->updateUsingKLT(*previousFrame);
 
-		currentFrame.calcProjMatrix();
+
+        currentFrame->calcProjMatrix();
 		
+        // for S01: baseline= 175
+        // for S02: baseline= 50
+        // for S03: baseline= 25 or 40
 
-        bool enough_baseline = has_enough_baseline(keyFrame.intrinsic.inv()*keyFrame.projMatrix, currentFrame.intrinsic.inv()*currentFrame.projMatrix, 175);
 
+        bool enough_baseline = has_enough_baseline(keyFrame->intrinsic.inv()*keyFrame->projMatrix, currentFrame->intrinsic.inv()*currentFrame->projMatrix, THR_BASELINE);
+        LOG("BEFORE: %d\t", currentFrame->squareFeatures.size());
         if (enough_baseline /*counter % 20 == 0*/) { // keyframe interval // change here from 5 to any other number
-			currentFrame.detectAndDescribe();
+            currentFrame->detectAndDescribe();
 
-            LOG("BEFORE: %d\t", currentFrame.squareFeatures.size());
-            matchAndTriangulate(keyFrame, currentFrame, currentFrame.intrinsic, currentFrame.distortion);
-            LOG("AFTER: %d\n", currentFrame.squareFeatures.size());
+            LOG("BEFORE: %d\t", currentFrame->squareFeatures.size());
+            matchAndTriangulate(*keyFrame, *currentFrame, currentFrame->intrinsic, currentFrame->distortion);
+            LOG("AFTER: %d\n", currentFrame->squareFeatures.size());
 
 			keyFrame = currentFrame;
             // This is extremely important (otherwise all Frames will have a common projMatrix in the memory)
-            keyFrame.projMatrix = currentFrame.projMatrix.clone();
-            keyFrame.descriptors = currentFrame.descriptors.clone();
+            keyFrame->projMatrix = currentFrame->projMatrix.clone();
+            keyFrame->descriptors = currentFrame->descriptors.clone();
+            keyFrame->r = currentFrame->r.clone();
+            keyFrame->t = currentFrame->t.clone();
 		}
 		
+
 		previousFrame = currentFrame;
 		counter++;
 	}
