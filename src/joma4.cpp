@@ -215,14 +215,25 @@ public:
 			previousPoints.push_back(previousFrame.squareFeatures[i].kp_.pt);
 		}
 
-		cv::calcOpticalFlowPyrLK(previousFrame.image, image, previousPoints, currentPoints, status, errors);
+//        void calcOpticalFlowPyrLK(InputArray prevImg, InputArray nextImg, InputArray prevPts,
+//                                  InputOutputArray nextPts, OutputArray status,
+//                                  OutputArray err,
+//                                  Size winSize=Size(21,21),
+//                                  int maxLevel=3,
+//                                  TermCriteria criteria=TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 30, 0.01),
+//                                  int flags=0, double minEigThreshold=1e-4 )
+
+        cv::calcOpticalFlowPyrLK(previousFrame.image, image, previousPoints, currentPoints, status, errors); //cv::Size(21,21), 3, cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01) , cv::OPTFLOW_LK_GET_MIN_EIGENVALS, 1e-4 ); //1e-4
 
 		for (int i = 0; i < previousPoints.size(); i++) {
             if (status[i] != 0 && errors.at<float>(i) < 12.0f) { // klt ok!
 				Feature f;
+
 				f.kp_ = cv::KeyPoint(currentPoints[i].x, currentPoints[i].y, 1);
 				f.p3D_ = previousFrame.squareFeatures[i].p3D_;
 				squareFeatures.push_back(f);
+
+                // Meaning: f is visible in this frame
 			}
 		}
 	}
@@ -416,7 +427,7 @@ int main(int argc, char **argv) {
 
         bool enough_baseline = has_enough_baseline(keyFrame->intrinsic.inv()*keyFrame->projMatrix, currentFrame->intrinsic.inv()*currentFrame->projMatrix, THR_BASELINE);
         LOG("BEFORE: %d\t", currentFrame->squareFeatures.size());
-        if (enough_baseline /*counter % 20 == 0*/) { // keyframe interval // change here from 5 to any other number
+        if (enough_baseline) { // keyframe interval // change here from 5 to any other number
             currentFrame->detectAndDescribe();
 
             LOG("BEFORE: %d\t", currentFrame->squareFeatures.size());
