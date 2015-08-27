@@ -14,7 +14,7 @@ namespace visual_odometry {
 
 namespace utils {
 
-void matchAndTriangulate(Frame& previousFrame, Frame& currentFrame, cv::Mat intrinsics, cv::Mat distortion);
+
 
 
 // Matcher goes here

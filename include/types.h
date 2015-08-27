@@ -82,11 +82,32 @@ public:
 class TrackSet{
 public:
     std::vector<cv::Point2f> points2D_;
-    std::vector<int> ids; // Points3D ids corresponding to each Point2D_
-    cv::Mat image;
+    std::vector<int> ids_; // Points3D ids corresponding to each Point2D_
+    cv::Mat image_;
 
 };
 
+
+class KeyFrame {
+public:
+    static int next_id_s_;
+    int id_;
+
+    KeyFrame(cv::Mat image) : image_(image), id_(next_id_s_++) {}
+
+    cv::Mat projMatrix_;
+
+    // Pose
+    cv::Mat tvec_, rvec_;
+
+    cv::Mat image_;
+
+    std::vector<cv::KeyPoint> keypoints_; // list of keypoints
+    cv::Mat descriptors_; // list of descripts, one to each keypoint in the list of keypoints
+    std::vector<int> ids_; // Points3D ids corresponding to each keypoint/descriptor;
+
+
+};
 
 class Frame {
 

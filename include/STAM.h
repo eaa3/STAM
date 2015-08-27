@@ -41,8 +41,11 @@ public:
 
 private:
 
+    static int next_id_s_;
+    static int next_kf_id_s_;
+
     bool has_enough_baseline(cv::Mat pose1, cv::Mat pose2, double thr_baseline);
-    void calcProjMatrix(cv::Mat guess_r = cv::Mat(), cv::Mat guess_t = cv::Mat());
+    cv::Mat calcProjMatrix(cv::Mat guess_r = cv::Mat(), cv::Mat guess_t = cv::Mat());
 
     void loadIntrinsicsFromFile(const std::string& filename);
 
@@ -50,18 +53,17 @@ private:
 
     void load3DPointsFromFile(const std::string& filename);
 
-    void updateUsingKLT(Frame& previousFrame);
+    void updateUsingKLT(cv::Mat curr_image);
 
-
-
+    void matchAndTriangulate(Frame& previousFrame, Frame& currentFrame, cv::Mat intrinsics, cv::Mat distortion);
 
 
     Frame::Ptr previousFrame;
     Frame::Ptr currentFrame;
     Frame::Ptr keyFrame;
 
-    TrackSet trackset;
-    Memory memory;
+    TrackSet trackset_;
+    Memory memory_;
 
     cv::Mat intrinsic, distortion;
 
