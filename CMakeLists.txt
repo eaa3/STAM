@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project (codeForLevel2)
+project (STAM)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules/ )
 
@@ -7,18 +7,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules/ 
 #set (Tutorial_VERSION_MAJOR 1)
 #set (Tutorial_VERSION_MINOR 0)
  
-# configure a header file to pass some of the CMake settings
-# to the source code
-#configure_file (
-#  "${PROJECT_SOURCE_DIR}/src/include/test.hpp"
-#  "${PROJECT_BINARY_DIR}/test.hpp"
-#  )
- 
-# add the binary tree to the search path for include files
-# so that we will find TutorialConfig.h
-#include_directories("${PROJECT_BINARY_DIR}" )
 include_directories("${PROJECT_SOURCE_DIR}/src/include")
-
 
 #########################################################
 # FIND OPENCV
@@ -27,49 +16,41 @@ find_package( OpenCV REQUIRED )
 
 find_package(cvsba REQUIRED )
 
-#########################################################
-# FIND PTHREADS
-#########################################################
-#find_package (Threads)
-
-
 ########################################################
 # Linking & stuff
 #########################################################
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(LEVEL2_INC_DIR "include")
-set(LEVEL2_SRC_DIR "src")
+set(STAM_INC_DIR "include")
+set(STAM_SRC_DIR "src")
 
-include_directories( ${LEVEL2_INC_DIR} )
+include_directories( ${STAM_INC_DIR} )
 
-set(LEVEL2_INC ismar.h "${LEVEL2_INC_DIR}/VOodoometry.h"
-                       "${LEVEL2_INC_DIR}/types.h"
-                       "${LEVEL2_INC_DIR}/utils.h"
+set(STAM_INC "${STAM_INC_DIR}/STAM.h"
+               "${STAM_INC_DIR}/types.h"
+               "${STAM_INC_DIR}/utils.h"
+               "${STAM_INC_DIR}/VideoSource.h"
 
     )
 
-set(LEVEL2_SRC user_function.cpp "${LEVEL2_SRC_DIR}/VOodoometry.cpp"
-                                 "${LEVEL2_SRC_DIR}/types.cpp"
-                                 "${LEVEL2_SRC_DIR}/utils.cpp"
+set(STAM_SRC "${STAM_SRC_DIR}/STAM.cpp"
+               "${STAM_SRC_DIR}/types.cpp"
+               "${STAM_SRC_DIR}/utils.cpp"
+               "${STAM_SRC_DIR}/VideoSource.cpp"
 
    )
 
-add_executable( level2 main2.cpp ${LEVEL2_INC} ${LEVEL2_SRC})
-#add_executable( test_level2 src/joma3.cpp ${LEVEL2_INC} ${LEVEL2_SRC})
-add_executable( demo_level2 main.cpp ${LEVEL2_INC} ${LEVEL2_SRC})
-add_executable( demo_level3 src/joma4.cpp ${LEVEL2_INC} ${LEVEL2_SRC})
+add_library( stam ${STAM_INC} ${STAM_SRC})
+
+add_executable( demo_level3 "${STAM_SRC_DIR}/main.cpp" )
 
 add_executable(cvsba_simple_test src/cvsba_simple_test.cpp)
 
+target_link_libraries(demo_level3 ${OpenCV_LIBS} ${cvsba_LIBS} stam)
+
 target_link_libraries(cvsba_simple_test ${OpenCV_LIBS} ${cvsba_LIBS})
 
-target_link_libraries( demo_level2 ${OpenCV_LIBS})
-#target_link_libraries( test_level2 ${OpenCV_LIBS})
-target_link_libraries( level2 ${OpenCV_LIBS})
 target_link_libraries( demo_level3 ${OpenCV_LIBS} ${cvsba_LIBS})
-
-#${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${CMAKE_THREAD_LIBS_INIT}  )
 
 
 

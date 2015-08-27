@@ -6,16 +6,57 @@ namespace visual_odometry {
 
 namespace utils {
 
-// Generic Matcher
+void matchAndTriangulate(Frame& previousFrame, Frame& currentFrame, cv::Mat intrinsics, cv::Mat distortion) {
 
-/*
-void DataSpotMatcher::match(DataSpot3D::DataSpot3DPtr spot_src, DataSpot3D::DataSpot3DPtr spot_target, std::vector<cv::DMatch>& matches){
+    static GenericMatcher matcher;
+    std::vector<cv::DMatch> matches;
 
-    match(spot_src->getImageColor(), spot_target->getImageColor(),
-          matches, spot_src->getKeyPoints(), spot_target->getKeyPoints());
+    matcher.match(currentFrame.descriptors, previousFrame.descriptors, matches, currentFrame.keypoints, previousFrame.keypoints);
 
+    LOG("NMatches %d\n",matches.size());
+
+    std::vector<cv::Point2f> previousTriangulate, currentTriangulate;
+    cv::Mat	outputTriangulate;
+    outputTriangulate.create(cv::Size(4, matches.size()), CV_32FC1);
+
+
+    for (int i = 0; i < matches.size(); i++) {
+        cv::Point pt1 = previousFrame.keypoints[matches[i].trainIdx].pt;
+        cv::Point pt2 = currentFrame.keypoints[matches[i].queryIdx].pt;
+        previousTriangulate.push_back(pt1);
+        currentTriangulate.push_back(pt2);
+    }
+
+
+    if( previousTriangulate.size() == 0 || currentTriangulate.size() == 0 ){
+        //LOG("Triangulation Points %d %d\n",previousTriangulate.size(),currentTriangulate.size());
+        return;
+    }
+
+
+
+
+    // undistort
+    std::vector<cv::Point2f> previousTriangulateUnd, currentTriangulateUnd;
+    cv::undistortPoints(previousTriangulate, previousTriangulateUnd, intrinsics, distortion);
+    cv::undistortPoints(currentTriangulate, currentTriangulateUnd, intrinsics, distortion);
+
+    cv::triangulatePoints(intrinsics.inv()*previousFrame.projMatrix, intrinsics.inv()*currentFrame.projMatrix, previousTriangulateUnd, currentTriangulateUnd, outputTriangulate);
+
+    for (int i = 0; i < matches.size(); i++) {
+        Feature f;
+        f.kp_ = cv::KeyPoint(currentTriangulate[i].x, currentTriangulate[i].y, 1);
+        f.p3D_ = cv::Point3f(outputTriangulate.at<float>(0, i) / outputTriangulate.at<float>(3, i),
+            outputTriangulate.at<float>(1, i) / outputTriangulate.at<float>(3, i),
+            outputTriangulate.at<float>(2, i) / outputTriangulate.at<float>(3, i));
+        currentFrame.squareFeatures.push_back(f);
+    }
 }
-*/
+
+
+
+
+// Generic Matcher
 
 
 // Match feature points using symmetry test and RANSAC

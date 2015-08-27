@@ -2,10 +2,20 @@
 #define _VOODOOMETRY_TYPES_
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/features2d/features2d.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
+#include "opencv2/nonfree/nonfree.hpp"
+#include <opencv2/video/video.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <vector>
 #include <map>
 #include <memory>
+#include <cstdio>
+#include <iostream>
+
+#define LOG(...) printf(__VA_ARGS__)
+
 
 namespace visual_odometry {
 
@@ -71,12 +81,78 @@ public:
 // Has only square features
 class TrackSet{
 public:
-    std::vector<cv::Point3f> points3D_;
     std::vector<cv::Point2f> points2D_;
-    std::vector<cv::KeyPoint> keypoints2D_;
+    std::vector<int> ids; // Points3D ids corresponding to each Point2D_
+    cv::Mat image;
+
+};
+
+
+class Frame {
+
+
+
+public:
+
+    typedef std::shared_ptr<Frame> Ptr;
+
+    static int next_id_s_;
+
+    Frame(int n) {
+        squareFeatures.resize(n);
+        triangleFeatures.resize(n);
+        projMatrix.create(cv::Size(4, 3), CV_64FC1);
+    }
+
+    Frame(const Frame& other) {
+        squareFeatures = other.squareFeatures;
+        triangleFeatures = other.triangleFeatures;
+        projMatrix = other.projMatrix.clone();
+        intrinsic = other.intrinsic;
+        distortion = other.distortion;
+        image = other.image;
+        keypoints = other.keypoints;
+        descriptors = other.descriptors.clone();
+    }
+
+    std::vector<Feature> squareFeatures;
+    std::vector<Feature> triangleFeatures;
+    cv::Mat projMatrix;
+    cv::Mat t, r;
+
+    // Intrinsics params
+    cv::Mat intrinsic;   // intrinsic parameters
+    cv::Mat distortion;  // lens distortion coefficients
 
     cv::Mat image;
-    cv::Mat descriptors;
+
+    std::vector<cv::KeyPoint> keypoints; // list of keypoints
+    cv::Mat descriptors; // list of descripts, one to each keypoint in the list of keypoints
+    std::vector<int> ids; // Points3D ids corresponding to each keypoint/descriptor;
+
+    int id_; // ID of this frame
+
+
+    void calcProjMatrix(cv::Mat guess_r = cv::Mat(), cv::Mat guess_t = cv::Mat());
+
+    void detectAndDescribe();
+
+
+    void loadIntrinsicsFromFile(const std::string& filename);
+
+    void loadKpFromFile(const std::string& filename);
+
+    void load3DPointsFromFile(const std::string& filename);
+
+    void printProjMatrix();
+
+    void readNextFrame(const std::string& NEXT_FRAME_FMT);
+
+    void updateUsingKLT(Frame& previousFrame);
+
+
+
+    void projectAndShow();
 
 };
 
@@ -88,15 +164,28 @@ class Memory {
 public:
 
 
-    std::vector<cv::Point3d> map_;
-    std::vector<cv::KeyPoint> keypoints2D_;
+    std::map<int, cv::Point3d> map_; // point3D id -> point3D
+    std::map<int, cv::Point2d> points2D_; // point2D id -> point2D
 
-    std::vector<cv::Mat> Rs_;
-    std::vector<cv::Mat> Ts_;
-    std::vector< std::vector< cv::Point2d > > points2D_;
-    std::vector<cv::Mat> cam_matrix_list, dist_coeff_list;
+    std::map<int, cv::Mat> Rs_; // keyframe id -> Rotation Matrix
+    std::map<int, cv::Mat> Ts_; // keyframe id -> Translation Vector
+
+    // keyframe id -> [ pair(point3D id, point2D id) ]
+    // => Projection (point2D id) of point3D on Keyframe with given keyframe id
+    std::multimap<int, std::pair< int, int > > projections_;
+
+    // keyframe id -> [ pair(point3D id, True|False) ]
+    // => True: point3D id is visible from keyframe id
+    // => False: point3D id is not visible from keyframe id
+    std::multimap<int, std::pair< int, bool > > visibility_;
+
+    // keyframe id -> intrinsic matrix, distortion coefficients
+    std::map<int, cv::Mat> cam_matrix_list, dist_coeff_list;
 
     cv::Mat camera_matrix, dist_coeffs;
+
+
+
 
 
 

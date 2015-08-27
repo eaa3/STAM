@@ -1,6 +1,8 @@
 #ifndef _VOODOOMETRY_UTILS_
 #define _VOODOOMETRY_UTILS_
 
+
+
 #include <opencv2/core/core.hpp>
 #include <types.h>
 #include <opencv2/features2d/features2d.hpp>
@@ -8,11 +10,12 @@
 #include <opencv2/nonfree/nonfree.hpp>
 
 
-void CalcProjectionMatrix(const std::vector<cv::Point3f>& pt_3d, const std::vector<cv::Point2f>& pt_2d, cv::Mat pM);
-
 namespace visual_odometry {
 
 namespace utils {
+
+void matchAndTriangulate(Frame& previousFrame, Frame& currentFrame, cv::Mat intrinsics, cv::Mat distortion);
+
 
 // Matcher goes here
 class GenericMatcher {
