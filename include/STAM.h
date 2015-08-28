@@ -22,6 +22,8 @@
 
 #include <cvsba/cvsba.h>
 
+namespace vo_utils = visual_odometry::utils;
+
 namespace visual_odometry {
 
 class STAM {
@@ -34,9 +36,9 @@ public:
              currentFrame(new Frame(40)),
              keyFrame(new Frame(40)) {}
 
-    bool init();
+    bool init(cv::Mat image);
 
-    void process(cv::Mat frame);
+    void process(cv::Mat image);
 
 
 private:
@@ -45,27 +47,34 @@ private:
     static int next_kf_id_s_;
 
     bool has_enough_baseline(cv::Mat pose1, cv::Mat pose2, double thr_baseline);
-    cv::Mat calcProjMatrix(cv::Mat guess_r = cv::Mat(), cv::Mat guess_t = cv::Mat());
+    cv::Mat calcProjMatrix(bool use_guess = false, cv::Mat guess_r = cv::Mat(), cv::Mat guess_t = cv::Mat());
 
     void loadIntrinsicsFromFile(const std::string& filename);
 
-    void loadKpFromFile(const std::string& filename);
+    void initFromFiles(cv::Mat image, const std::string& p2D_filename, const std::string& p3D_filename);
 
-    void load3DPointsFromFile(const std::string& filename);
+    void updateUsingKLT(cv::Mat image);
 
-    void updateUsingKLT(cv::Mat curr_image);
+    void mapping(Frame::Ptr key_frame, Frame::Ptr current_frame);
 
-    void matchAndTriangulate(Frame& previousFrame, Frame& currentFrame, cv::Mat intrinsics, cv::Mat distortion);
+    void matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame, cv::Mat intrinsics, cv::Mat distortion);
+
+    void projectAndShow(cv::Mat projMatrix, cv::Mat image);
 
 
     Frame::Ptr previousFrame;
     Frame::Ptr currentFrame;
     Frame::Ptr keyFrame;
 
+    Frame::Ptr previous_frame_;
+    std::list<Frame::Ptr> key_frames_;
+
     TrackSet trackset_;
     Memory memory_;
 
-    cv::Mat intrinsic, distortion;
+    vo_utils::GenericMatcher matcher;
+
+    cv::Mat intrinsics_, distortion_;
 
 
 

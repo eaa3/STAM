@@ -6,7 +6,36 @@ namespace visual_odometry {
 
 namespace utils {
 
+void convertToStdVector(cv::Mat descriptors, std::vector<cv::Mat>& descs_vector_out){
 
+    for(int i = 0; i < descriptors.rows; i++){
+        cv::Mat desc = descriptors(cv::Range(i,i+1), cv::Range(0,descriptors.cols)).clone();
+        descs_vector_out.push_back(desc);
+    }
+
+}
+
+cv::Mat convertToMat(const std::vector<cv::Mat>& descs_vector){
+    //if( descs_vector.size() == 0 )
+    //    return;
+
+    if( descs_vector.size() == 0 ){
+        printf("WARNING!!!\n");
+    }
+
+    int cols = descs_vector[0].cols;
+    cv::Mat descriptors_out;
+    descriptors_out.create(descs_vector.size(), cols, descs_vector[0].type() );
+
+    for(int i = 0; i < descs_vector.size(); i++){
+        descs_vector[i].copyTo(descriptors_out(cv::Range(i,i+1), cv::Range(0,cols)));
+    }
+
+    printf("rows %d cols %d\n", descriptors_out.rows,descriptors_out.cols);
+
+    return descriptors_out;
+
+}
 
 // Generic Matcher
 

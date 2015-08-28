@@ -4,7 +4,6 @@
 
 
 #include <opencv2/core/core.hpp>
-#include <types.h>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/nonfree/nonfree.hpp>
@@ -15,6 +14,8 @@ namespace visual_odometry {
 namespace utils {
 
 
+void convertToStdVector(cv::Mat descriptors, std::vector<cv::Mat>& descs_vector_out);
+cv::Mat convertToMat(const std::vector<cv::Mat>& descs_vector);
 
 
 // Matcher goes here

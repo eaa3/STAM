@@ -14,6 +14,8 @@
 #include <cstdio>
 #include <iostream>
 
+#include "utils.h"
+
 #define LOG(...) printf(__VA_ARGS__)
 
 
@@ -83,6 +85,7 @@ class TrackSet{
 public:
     std::vector<cv::Point2f> points2D_;
     std::vector<int> ids_; // Points3D ids corresponding to each Point2D_
+    cv::Mat projMatrix;
     cv::Mat image_;
 
 };
@@ -125,6 +128,8 @@ public:
         projMatrix.create(cv::Size(4, 3), CV_64FC1);
     }
 
+    Frame(cv::Mat image) : image(image) {}
+
     Frame(const Frame& other) {
         squareFeatures = other.squareFeatures;
         triangleFeatures = other.triangleFeatures;
@@ -149,7 +154,7 @@ public:
 
     std::vector<cv::KeyPoint> keypoints; // list of keypoints
     cv::Mat descriptors; // list of descripts, one to each keypoint in the list of keypoints
-    std::vector<int> ids; // Points3D ids corresponding to each keypoint/descriptor;
+    std::vector<int> ids_; // Points3D ids corresponding to each keypoint/descriptor;
 
     int id_; // ID of this frame
 
@@ -184,6 +189,9 @@ class Memory {
 
 public:
 
+    static int next_p3d_id_s_;
+    static int next_p2d_id_s_;
+
 
     std::map<int, cv::Point3d> map_; // point3D id -> point3D
     std::map<int, cv::Point2d> points2D_; // point2D id -> point2D
@@ -206,7 +214,24 @@ public:
     cv::Mat camera_matrix, dist_coeffs;
 
 
+    // Add new keyframe pose
+    void addKeyFrame(int key_frame_id, cv::Mat rvec, cv::Mat tvec);
 
+    // Add correspondence to memory belonging to a specific keyframe identified by its keyframe_id
+    // A correspondence is a 3D point and its corresponding projection on the image plane
+    // return: (p3d_id, p2d_id)
+    std::pair<int,int> addCorrespondence(int key_frame_id, cv::Point2d p2D, cv::Point3d p3D);
+    std::pair<int,int> addCorrespondence(int key_frame_id, cv::Point2f p2D, cv::Point3f p3D);
+
+    // Add correspondence to memory belonging to a specific keyframe identified by its keyframe_id
+    // A correspondence is a 3D point id and its corresponding projection on the image plane
+    // return: (p3d_id, p2d_id)
+    std::pair<int,int> addCorrespondence(int key_frame_id, cv::Point2d p2D, int point3d_id);
+    std::pair<int,int> addCorrespondence(int key_frame_id, cv::Point2f p2D, int point3d_id);
+
+
+    // return: (p3d_id, p2d_id)
+    std::pair<int,int> addCorrespondence(int key_frame_id, int point2d_id, int point3d_id);
 
 
 
