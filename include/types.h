@@ -23,63 +23,6 @@ namespace visual_odometry {
 
 typedef unsigned int Identifier;
 
-class Feature {
-
-private:
-    static int next_id_s_;
-
-public:
-    typedef std::shared_ptr<Feature> Ptr;
-    typedef std::map<int, Feature::Ptr> FeatMap;
-    typedef std::vector<Feature::Ptr> FeatPtrSeq;
-    typedef std::vector<Feature> FeatSeq;
-
-
-    // TYPE ENUM
-    enum {
-        TRIANGLE, // Newly detected feature
-        STAR, // Re-observed feature but non-triangulated yet
-        SQUARE, // HAS 2D and 3D POINTS SET
-        //CIRCLE, // Ready to use in the current frame
-        UNKOWN
-    };
-
-
-    Feature() : id_(next_id_s_++), frame_id_(-1), type_(UNKOWN) {}
-    Feature(const Feature& other) {
-        id_ = other.id_;
-        frame_id_ = other.frame_id_;
-        kp_ = other.kp_;
-        p3D_ = other.p3D_;
-        desc_ = other.desc_;
-        type_ = other.type_;
-    }
-
-
-
-
-    operator cv::Mat(){
-        return desc_;
-    }
-
-    operator cv::KeyPoint(){
-        return kp_;
-    }
-
-    operator cv::Point3f(){
-        return p3D_;
-    }
-
-
-    int id_, frame_id_;
-    cv::KeyPoint kp_;
-    cv::Point3f p3D_;
-    cv::Mat desc_;
-
-    int type_;
-
-};
-
 // Has only square features
 class TrackSet{
 public:
@@ -122,33 +65,18 @@ public:
 
     static int next_id_s_;
 
-    Frame(int n) {
-        squareFeatures.resize(n);
-        triangleFeatures.resize(n);
-        projMatrix.create(cv::Size(4, 3), CV_64FC1);
-    }
-
     Frame(cv::Mat image) : image(image) {}
 
     Frame(const Frame& other) {
-        squareFeatures = other.squareFeatures;
-        triangleFeatures = other.triangleFeatures;
+
         projMatrix = other.projMatrix.clone();
-        intrinsic = other.intrinsic;
-        distortion = other.distortion;
         image = other.image;
         keypoints = other.keypoints;
         descriptors = other.descriptors.clone();
     }
 
-    std::vector<Feature> squareFeatures;
-    std::vector<Feature> triangleFeatures;
     cv::Mat projMatrix;
     cv::Mat t, r;
-
-    // Intrinsics params
-    cv::Mat intrinsic;   // intrinsic parameters
-    cv::Mat distortion;  // lens distortion coefficients
 
     cv::Mat image;
 
@@ -158,28 +86,7 @@ public:
 
     int id_; // ID of this frame
 
-
-    void calcProjMatrix(cv::Mat guess_r = cv::Mat(), cv::Mat guess_t = cv::Mat());
-
     void detectAndDescribe();
-
-
-    void loadIntrinsicsFromFile(const std::string& filename);
-
-    void loadKpFromFile(const std::string& filename);
-
-    void load3DPointsFromFile(const std::string& filename);
-
-    void printProjMatrix();
-
-    void readNextFrame(const std::string& NEXT_FRAME_FMT);
-
-    void updateUsingKLT(Frame& previousFrame);
-
-
-
-    void projectAndShow();
-
 };
 
 
