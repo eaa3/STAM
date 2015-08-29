@@ -5,7 +5,7 @@
 int SCENE = 1;
 
 
-double baseline[] = { 175, 50, 40 };
+double baseline[] = { 175, 50, 25 };
 std::string points2d_init_file[] = { "S01_2Ddata_dst_init.csv", "S02_2Ddata_dst_init.csv", "S03_2Ddata_dst_init.csv" };
 std::string points3d_init_file[] = { "S01_3Ddata_dst_init.csv", "S02_3Ddata_dst_init.csv", "S03_3Ddata_dst_init.csv" };
 std::string intrinsics_file[] = { "intrinsicsS01.xml", "intrinsicsS02.xml", "intrinsicsS03.xml" };
@@ -62,6 +62,7 @@ void STAM::process(cv::Mat image){
     // for S02: baseline= 50
     // for S03: baseline= 25 or 40
 
+    // last keyframe
     Frame::Ptr key_frame = key_frames_.back();
 
     bool enough_baseline = has_enough_baseline(intrinsics_.inv()*key_frame->projMatrix, intrinsics_.inv()*current_frame->projMatrix, params.baseline_thr);
@@ -186,7 +187,7 @@ cv::Mat STAM::calcProjMatrix(bool use_guess, cv::Mat guess_r, cv::Mat guess_t) {
     std::vector<cv::Point3f> points3d;
     std::vector<cv::Point2f> points2d;
 
-    for (int i = std::max<int>(0,(trackset_.points2D_.size()-40)); i < trackset_.points2D_.size(); i++) {
+    for (int i = std::max<int>(0,(trackset_.points2D_.size()-100)); i < trackset_.points2D_.size(); i++) {
 
         if( trackset_.ids_[i] >= 0 ){
             points3d.push_back(memory_.map_[trackset_.ids_[i]]);
