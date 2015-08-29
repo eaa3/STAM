@@ -34,21 +34,6 @@ bool STAM::init(cv::Mat image){
     initFromFiles(image, params.POINTS_2D_INIT_FILE, params.POINTS_3D_INIT_FILE);
 
 
-    /*
-    previousFrame->loadKpFromFile(POINTS_2D_INIT_FILE);
-    previousFrame->load3DPointsFromFile(POINTS_3D_INIT_FILE);
-    previousFrame->loadIntrinsicsFromFile(INTRINSICS_FILE);
-    currentFrame->loadIntrinsicsFromFile(INTRINSICS_FILE);
-
-    previousFrame->readNextFrame(NEXT_FRAME_FMT);
-
-    previousFrame->calcProjMatrix();
-
-    previousFrame->detectAndDescribe();
-
-    keyFrame = previousFrame;
-    */
-
     return true;
 
 }
