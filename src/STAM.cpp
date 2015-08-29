@@ -5,7 +5,7 @@
 int SCENE = 1;
 
 
-double baseline[] = { 175, 50, 25 };
+double baseline[] = { 175, 50, 40 };
 std::string points2d_init_file[] = { "S01_2Ddata_dst_init.csv", "S02_2Ddata_dst_init.csv", "S03_2Ddata_dst_init.csv" };
 std::string points3d_init_file[] = { "S01_3Ddata_dst_init.csv", "S02_3Ddata_dst_init.csv", "S03_3Ddata_dst_init.csv" };
 std::string intrinsics_file[] = { "intrinsicsS01.xml", "intrinsicsS02.xml", "intrinsicsS03.xml" };
@@ -24,8 +24,14 @@ int STAM::next_kf_id_s_ = 0;
 
 bool STAM::init(cv::Mat image){
 
-    loadIntrinsicsFromFile(INTRINSICS_FILE);
-    initFromFiles(image, POINTS_2D_INIT_FILE, POINTS_3D_INIT_FILE);
+    params.baseline_thr = baseline[SCENE-1];
+    params.POINTS_2D_INIT_FILE = points2d_init_file[SCENE-1];
+    params.POINTS_3D_INIT_FILE = points3d_init_file[SCENE-1];
+    params.INTRINSICS_FILE = intrinsics_file[SCENE-1];
+    params.NEXT_FRAME_FMT = next_frame_fmt[SCENE-1];
+
+    loadIntrinsicsFromFile(params.INTRINSICS_FILE);
+    initFromFiles(image, params.POINTS_2D_INIT_FILE, params.POINTS_3D_INIT_FILE);
 
 
     /*
@@ -73,8 +79,7 @@ void STAM::process(cv::Mat image){
 
     Frame::Ptr key_frame = key_frames_.back();
 
-    bool enough_baseline = has_enough_baseline(intrinsics_.inv()*key_frame->projMatrix, intrinsics_.inv()*current_frame->projMatrix, THR_BASELINE);
-    //LOG("BEFORE: %d\t", currentFrame->squareFeatures.size());
+    bool enough_baseline = has_enough_baseline(intrinsics_.inv()*key_frame->projMatrix, intrinsics_.inv()*current_frame->projMatrix, params.baseline_thr);
 
     if (enough_baseline) { // keyframe interval // change here from 5 to any other number
         current_frame->detectAndDescribe();
@@ -432,7 +437,7 @@ void STAM::projectAndShow(cv::Mat projMatrix, cv::Mat image) {
 
 
     cv::imshow("frame", imcopy);
-    if (cv::waitKey(0) == 27) exit(0);
+    if (cv::waitKey(1) == 27) exit(0);
 }
 
 

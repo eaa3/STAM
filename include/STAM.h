@@ -24,6 +24,8 @@
 
 namespace vo_utils = visual_odometry::utils;
 
+extern int SCENE;
+
 namespace visual_odometry {
 
 class STAM {
@@ -32,9 +34,20 @@ class STAM {
 
 public:
 
-    STAM() : previousFrame(new Frame(40)),
-             currentFrame(new Frame(40)),
-             keyFrame(new Frame(40)) {}
+    class Params {
+
+    public:
+
+        double baseline_thr;
+        std::string POINTS_2D_INIT_FILE;
+        std::string POINTS_3D_INIT_FILE;
+        std::string INTRINSICS_FILE;
+        std::string NEXT_FRAME_FMT;
+
+    };
+
+
+    STAM()  {}
 
     bool init(cv::Mat image);
 
@@ -62,10 +75,6 @@ private:
     void projectAndShow(cv::Mat projMatrix, cv::Mat image);
 
 
-    Frame::Ptr previousFrame;
-    Frame::Ptr currentFrame;
-    Frame::Ptr keyFrame;
-
     Frame::Ptr previous_frame_;
     std::list<Frame::Ptr> key_frames_;
 
@@ -75,6 +84,8 @@ private:
     vo_utils::GenericMatcher matcher;
 
     cv::Mat intrinsics_, distortion_;
+
+    Params params;
 
 
 
