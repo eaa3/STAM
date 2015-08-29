@@ -56,8 +56,6 @@ public:
 
 private:
 
-    static int next_id_s_;
-    static int next_kf_id_s_;
 
     bool has_enough_baseline(cv::Mat pose1, cv::Mat pose2, double thr_baseline);
     cv::Mat calcProjMatrix(bool use_guess = false, cv::Mat guess_r = cv::Mat(), cv::Mat guess_t = cv::Mat());

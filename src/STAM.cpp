@@ -19,8 +19,7 @@ const std::string NEXT_FRAME_FMT = next_frame_fmt[SCENE-1];
 
 namespace visual_odometry {
 
-int STAM::next_id_s_ = 0;
-int STAM::next_kf_id_s_ = 0;
+
 
 bool STAM::init(cv::Mat image){
 
