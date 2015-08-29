@@ -118,8 +118,6 @@ public:
     // keyframe id -> intrinsic matrix, distortion coefficients
     std::map<int, cv::Mat> cam_matrix_list, dist_coeff_list;
 
-    cv::Mat camera_matrix, dist_coeffs;
-
 
     // Add new keyframe pose
     void addKeyFrame(int key_frame_id, cv::Mat rvec, cv::Mat tvec);

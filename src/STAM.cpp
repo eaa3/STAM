@@ -276,6 +276,8 @@ void STAM::mapping(Frame::Ptr key_frame, Frame::Ptr current_frame){
     // This frame becomes a keyframe
     key_frames_.push_back(current_frame);
 
+    memory_.addKeyFrame(current_frame->id_, current_frame->r, current_frame->t);
+
 
 }
 
