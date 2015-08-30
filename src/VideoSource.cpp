@@ -9,9 +9,8 @@ cv::Mat VideoSource::readNextFrame(const std::string& NEXT_FRAME_FMT) {
     char buf[256];
     sprintf(buf, NEXT_FRAME_FMT.c_str(), findex++);
     image = cv::imread(buf);
-    if (image.empty()) {
-        exit(0);
-    }
+
+    //if( findex >= 100 ) return cv::Mat();
 
     return image;
 }

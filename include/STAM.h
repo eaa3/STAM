@@ -53,12 +53,14 @@ public:
 
     void process(cv::Mat image);
 
+    void optimise();
+
 
 private:
 
 
     bool has_enough_baseline(cv::Mat pose1, cv::Mat pose2, double thr_baseline);
-    cv::Mat calcProjMatrix(bool use_guess = false, cv::Mat guess_r = cv::Mat(), cv::Mat guess_t = cv::Mat());
+    cv::Mat calcProjMatrix(bool use_guess, cv::Mat& guess_r, cv::Mat& guess_t);
 
     void loadIntrinsicsFromFile(const std::string& filename);
 
@@ -68,7 +70,7 @@ private:
 
     void mapping(Frame::Ptr key_frame, Frame::Ptr current_frame);
 
-    void matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame, cv::Mat intrinsics, cv::Mat distortion);
+    bool matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame, cv::Mat intrinsics, cv::Mat distortion);
 
     void projectAndShow(cv::Mat projMatrix, cv::Mat image);
 

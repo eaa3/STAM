@@ -39,7 +39,8 @@ bool STAM::init(cv::Mat image){
 
 
 void STAM::process(cv::Mat image){
-
+    if( image.empty() )
+        return;
 
     Frame::Ptr current_frame = Frame::Ptr(new Frame(image));
 
@@ -56,6 +57,10 @@ void STAM::process(cv::Mat image){
 
 
     current_frame->projMatrix = calcProjMatrix(false, current_frame->r, current_frame->t);
+    if( current_frame->r.rows*current_frame->r.cols != 3 || current_frame->t.cols*current_frame->t.rows != 3){
+        printf("LOOOOOLLL");
+        cv::waitKey(0);
+    }
 
     // for S01: baseline= 175
     // for S02: baseline= 50
@@ -128,7 +133,7 @@ bool STAM::has_enough_baseline(cv::Mat pose1, cv::Mat pose2, double thr_baseline
 
     double baseline = cv::norm(pos1 - pos2);
 
-    LOG("Baseline %f\n", baseline);
+    //LOG("Baseline %f\n", baseline);
     return baseline >= thr_baseline;
 }
 
@@ -139,6 +144,9 @@ void STAM::loadIntrinsicsFromFile(const std::string& filename){
     if( cvfs.isOpened() ){
         cvfs["mat_intrinsicMat"] >> intrinsics_;
         cvfs["mat_distortionMat"] >> distortion_;
+
+        printf("Loaded distortion %d %d\n", distortion_.rows, distortion_.cols);
+        //cv::waitKey(0);
     }
 }
 
@@ -169,19 +177,22 @@ void STAM::initFromFiles(cv::Mat image, const std::string& p2D_filename, const s
 
     frame->detectAndDescribe();
 
-    frame->projMatrix = calcProjMatrix();
+    frame->projMatrix = calcProjMatrix(false, frame->r, frame->t);
     trackset_.projMatrix = frame->projMatrix;
 
     key_frames_.push_back(frame);
 
+    // Not used
     previous_frame_ = frame;
+
+    memory_.addKeyFrame(frame->id_, frame->r, frame->t, intrinsics_, distortion_(cv::Range(0,1),cv::Range(0,5)));
 
     fclose(p2D_f);
     fclose(p3D_f);
 }
 
 
-cv::Mat STAM::calcProjMatrix(bool use_guess, cv::Mat guess_r, cv::Mat guess_t) {
+cv::Mat STAM::calcProjMatrix(bool use_guess, cv::Mat& guess_r, cv::Mat& guess_t) {
 
     std::vector<cv::Point3f> points3d;
     std::vector<cv::Point2f> points2d;
@@ -210,11 +221,10 @@ cv::Mat STAM::calcProjMatrix(bool use_guess, cv::Mat guess_r, cv::Mat guess_t) {
     //        )
 
 
-    LOG("Number of Points %d\n", points3d.size());
+    //LOG("Number of Points %d\n", points3d.size());
 
-    cv::Mat tvec = guess_t, rvec = guess_r;
-    cv::solvePnPRansac(points3d, points2d, intrinsics_, distortion_, rvec, tvec, use_guess, 100, 5.0, 0.99);
-    rvec.copyTo(guess_r); tvec.copyTo(guess_t);
+    cv::solvePnPRansac(points3d, points2d, intrinsics_, distortion_, guess_r, guess_t, use_guess, 100, 5.0, 0.99);
+    cv::Mat rvec = guess_r, tvec = guess_t;
     cv::Mat R;
     cv::Rodrigues(rvec, R);
 
@@ -270,18 +280,22 @@ void STAM::mapping(Frame::Ptr key_frame, Frame::Ptr current_frame){
 
 
     //LOG("BEFORE: %d\t", frame->squareFeatures.size());
-    matchAndTriangulate(key_frame, current_frame, intrinsics_, distortion_);
+    bool success = matchAndTriangulate(key_frame, current_frame, intrinsics_, distortion_);
     //LOG("AFTER: %d\n", currentFrame->squareFeatures.size());
 
-    // This frame becomes a keyframe
-    key_frames_.push_back(current_frame);
+    if( success ) {
+        // This frame becomes a keyframe
+        key_frames_.push_back(current_frame);
 
-    memory_.addKeyFrame(current_frame->id_, current_frame->r, current_frame->t);
+        memory_.addKeyFrame(current_frame->id_, current_frame->r, current_frame->t, intrinsics_, distortion_(cv::Range(0,1),cv::Range(0,5)));
+
+    }
+
 
 
 }
 
-void STAM::matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame, cv::Mat intrinsics, cv::Mat distortion) {
+bool STAM::matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame, cv::Mat intrinsics, cv::Mat distortion) {
 
     std::vector<cv::DMatch> matches;
 
@@ -293,6 +307,9 @@ void STAM::matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame,
 
 
     LOG("NMatches %d\n",matches.size());
+
+    if( !matches.size() )
+        return false;
 
     std::vector<cv::Point2f> previousTriangulate, currentTriangulate;
     cv::Mat	outputTriangulate;
@@ -334,7 +351,7 @@ void STAM::matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame,
 
     if( previousTriangulate.size() == 0 || currentTriangulate.size() == 0 ){
         //LOG("Triangulation Points %d %d\n",previousTriangulate.size(),currentTriangulate.size());
-        return;
+        return false;
     }
 
 
@@ -368,6 +385,8 @@ void STAM::matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame,
         trackset_.ids_.push_back(p3d_id);
 
     }
+
+    return true;
 }
 
 void STAM::projectAndShow(cv::Mat projMatrix, cv::Mat image) {
@@ -424,9 +443,16 @@ void STAM::projectAndShow(cv::Mat projMatrix, cv::Mat image) {
 
 
     cv::imshow("frame", imcopy);
-    if (cv::waitKey(1) == 27) exit(0);
+    if (cv::waitKey(1) == 27) {
+        exit(0);
+    }
+
 }
 
+
+void STAM::optimise() {
+    memory_.optimise();
+}
 
 
 

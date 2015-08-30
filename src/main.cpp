@@ -37,6 +37,8 @@ int main(int argc, char** argv){
 
     }
 
+    STAM.optimise();
+
     printf("BYEBYE\n");
 
     return 0;

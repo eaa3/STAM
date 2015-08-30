@@ -34,26 +34,6 @@ public:
 };
 
 
-class KeyFrame {
-public:
-    static int next_id_s_;
-    int id_;
-
-    KeyFrame(cv::Mat image) : image_(image), id_(next_id_s_++) {}
-
-    cv::Mat projMatrix_;
-
-    // Pose
-    cv::Mat tvec_, rvec_;
-
-    cv::Mat image_;
-
-    std::vector<cv::KeyPoint> keypoints_; // list of keypoints
-    cv::Mat descriptors_; // list of descripts, one to each keypoint in the list of keypoints
-    std::vector<int> ids_; // Points3D ids corresponding to each keypoint/descriptor;
-
-
-};
 
 class Frame {
 
@@ -65,14 +45,18 @@ public:
 
     static int next_id_s_;
 
-    Frame(cv::Mat image) : image(image) {}
+    Frame(cv::Mat image) : image(image), id_(next_id_s_++) {}
 
     Frame(const Frame& other) {
 
         projMatrix = other.projMatrix.clone();
-        image = other.image;
+        image = other.image.clone();
         keypoints = other.keypoints;
         descriptors = other.descriptors.clone();
+        id_ = other.id_;
+        ids_ = other.ids_;
+        t = other.t.clone();
+        r = other.r.clone();
     }
 
     cv::Mat projMatrix;
@@ -120,7 +104,7 @@ public:
 
 
     // Add new keyframe pose
-    void addKeyFrame(int key_frame_id, cv::Mat rvec, cv::Mat tvec);
+    void addKeyFrame(int key_frame_id, cv::Mat rvec, cv::Mat tvec, cv::Mat cam_matrix, cv::Mat dist_coeff);
 
     // Add correspondence to memory belonging to a specific keyframe identified by its keyframe_id
     // A correspondence is a 3D point and its corresponding projection on the image plane
@@ -139,6 +123,8 @@ public:
     std::pair<int,int> addCorrespondence(int key_frame_id, int point2d_id, int point3d_id);
 
 
+
+    void optimise();
 
 
 };
