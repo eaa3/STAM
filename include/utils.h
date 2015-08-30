@@ -1,3 +1,13 @@
+/** @file utils.h
+ *
+ * @author	Ermano A Arruda (eaa3@cin.ufpe.br)
+ * @author	Joao Marcelo Teixeira (jmxnt@cin.ufpe.br)
+ *
+ * @version 1.0
+ *
+ */
+
+
 #ifndef _VOODOOMETRY_UTILS_
 #define _VOODOOMETRY_UTILS_
 

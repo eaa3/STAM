@@ -1,3 +1,12 @@
+/** @file utils.cpp
+ *
+ * @author	Ermano A Arruda (eaa3@cin.ufpe.br)
+ * @author	Joao Marcelo Teixeira (jmxnt@cin.ufpe.br)
+ *
+ * @version 1.0
+ *
+ */
+
 
 #include "utils.h"
 #include <iostream>

@@ -1,3 +1,13 @@
+/** @file main.cpp
+ *
+ * @author	Ermano A Arruda (eaa3@cin.ufpe.br)
+ * @author	Joao Marcelo Teixeira (jmxnt@cin.ufpe.br)
+ *
+ * @version 1.0
+ *
+ */
+
+
 #include "VideoSource.h"
 #include "STAM.h"
 
@@ -35,7 +45,8 @@ int main(int argc, char** argv){
 
         STAM.process(frame);
 
-        if( i%300 == 0 )
+
+        if( SCENE > 1 && i%300 == 0 )
             STAM.optimise();
 
         i++;
