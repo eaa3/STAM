@@ -1,4 +1,4 @@
-/** @file utils.h
+/** @file VideoSource.h
  *
  * @author	Ermano A Arruda (eaa3@cin.ufpe.br)
  * @author	Joao Marcelo Teixeira (jmxnt@cin.ufpe.br)
