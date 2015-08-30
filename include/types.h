@@ -122,7 +122,9 @@ public:
     // return: (p3d_id, p2d_id)
     std::pair<int,int> addCorrespondence(int key_frame_id, int point2d_id, int point3d_id);
 
+    void dumpMapAndKFExtrinsics();
 
+    void updateKF(Frame::Ptr keyframe);
 
     void optimise();
 

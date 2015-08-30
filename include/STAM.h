@@ -54,7 +54,8 @@ public:
     void process(cv::Mat image);
 
     void optimise();
-
+    void dump();
+    std::list<Frame::Ptr> key_frames_;
 
 private:
 
@@ -74,9 +75,10 @@ private:
 
     void projectAndShow(cv::Mat projMatrix, cv::Mat image);
 
+    void updateOptimisedKF();
 
     Frame::Ptr previous_frame_;
-    std::list<Frame::Ptr> key_frames_;
+    //std::list<Frame::Ptr> key_frames_;
 
     TrackSet trackset_;
     Memory memory_;

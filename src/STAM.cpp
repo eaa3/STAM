@@ -5,7 +5,7 @@
 int SCENE = 1;
 
 
-double baseline[] = { 175, 50, 25 };
+double baseline[] = { 175, 50, 35 };
 std::string points2d_init_file[] = { "S01_2Ddata_dst_init.csv", "S02_2Ddata_dst_init.csv", "S03_2Ddata_dst_init.csv" };
 std::string points3d_init_file[] = { "S01_3Ddata_dst_init.csv", "S02_3Ddata_dst_init.csv", "S03_3Ddata_dst_init.csv" };
 std::string intrinsics_file[] = { "intrinsicsS01.xml", "intrinsicsS02.xml", "intrinsicsS03.xml" };
@@ -452,8 +452,18 @@ void STAM::projectAndShow(cv::Mat projMatrix, cv::Mat image) {
 
 void STAM::optimise() {
     memory_.optimise();
+    updateOptimisedKF();
 }
 
+void STAM::dump() {
+    memory_.dumpMapAndKFExtrinsics();
+}
+
+void STAM::updateOptimisedKF(){
+    auto it = key_frames_.begin();
+    for(;it!=key_frames_.end(); it++)
+        memory_.updateKF(*it);
+}
 
 
 }

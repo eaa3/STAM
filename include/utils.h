@@ -28,7 +28,7 @@ public:
     // for S01:  ratio_(0.45f), refineF_(true),
     // confidence_(0.99), distance_(2.0)
     GenericMatcher() : ratio_(0.65f), refineF_(true),
-        confidence_(0.99), distance_(2.0) {
+        confidence_(0.99), distance_(1.0) {
         // SURF is the default feature
         detector_ = new cv::StarFeatureDetector(32, 10, 18, 18, 20);//new cv::SurfFeatureDetector();
         extractor_ = new cv::SURF(1000, 4, 2, false, true);//new cv::SurfDescriptorExtractor();

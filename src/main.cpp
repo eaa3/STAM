@@ -29,15 +29,23 @@ int main(int argc, char** argv){
 
 
     std::string next_frame_format[] = { "S01L03_VGA/S01L03_VGA_%04d.png", "S02L03_VGA/S02L03_VGA_%04d.png", "S03L03_VGA/S03L03_VGA_%04d.png"};
-
+    int i = 0;
     STAM.init(video_source.readNextFrame(next_frame_format[SCENE-1]));
     while( !(frame = video_source.readNextFrame(next_frame_format[SCENE-1])).empty() ){
 
         STAM.process(frame);
 
+        if( i%300 == 0 )
+            STAM.optimise();
+
+        i++;
+
+
+
     }
 
     STAM.optimise();
+    STAM.dump();
 
     printf("BYEBYE\n");
 

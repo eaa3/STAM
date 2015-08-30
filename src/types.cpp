@@ -1,6 +1,7 @@
 #include "types.h"
 #include <stdio.h>
 #include <cvsba/cvsba.h>
+#include <fstream>
 
 namespace visual_odometry {
 
@@ -179,8 +180,87 @@ void Memory::optimise() {
     printf("Bundle Adjustment FINISHED! \n");
     std::cout<<"Initial error="<<sba.getInitialReprjError()<<". Final error="<<sba.getFinalReprjError()<<std::endl;
 
+    for(auto it =  kf_map.begin(); it != kf_map.end(); it++){
+
+        //printf("accessing RT pos %d\n", it->second);
+
+        Rs_[it->first] = R[it->second];
+        Ts_[it->first] = T[it->second];
+    }
+
+    // TODO: Update map using points3D
+
 
 }
+
+void Memory::updateKF(Frame::Ptr keyframe){
+
+    auto it_r = Rs_.find(keyframe->id_);
+    auto it_t = Ts_.find(keyframe->id_);
+    auto it_cam = cam_matrix_list.find(keyframe->id_);
+
+    cv::Mat rvec = it_r->second;
+    cv::Mat tvec = it_t->second;
+
+    cv::Mat intrinsics = it_cam->second;
+
+    cv::Mat R;
+    cv::Rodrigues(rvec, R);
+
+    cv::Mat Pose(3,4, R.type());
+    R.copyTo(Pose(cv::Rect(0, 0, 3, 3)));
+    tvec.copyTo(Pose(cv::Rect(3, 0, 1, 3)));
+    cv::Mat projMatrix = intrinsics*Pose;
+
+    keyframe->r = rvec;
+    keyframe->t = tvec;
+
+    keyframe->projMatrix = projMatrix;
+
+}
+
+void Memory::dumpMapAndKFExtrinsics() {
+
+
+    std::ofstream kf_ext_out("kf_extrinsics_dump.txt");
+    std::ofstream kf_projmatrix_out("kf_projmatrix_dump.txt");
+    FILE* map_out = fopen("map_dump.txt","w");
+
+    auto it_r = Rs_.begin();
+    auto it_t = Ts_.begin();
+    auto it_cam = cam_matrix_list.begin();
+    for(; it_r != Rs_.end() && it_t != Ts_.end() && it_cam != cam_matrix_list.end(); it_r++, it_t++, it_cam++){
+
+        cv::Mat rvec = it_r->second;
+        cv::Mat tvec = it_t->second;
+        kf_ext_out << rvec << tvec << std::endl;
+
+        cv::Mat intrinsics = it_cam->second;
+
+        cv::Mat R;
+        cv::Rodrigues(rvec, R);
+
+        cv::Mat Pose(3,4, R.type());
+        R.copyTo(Pose(cv::Rect(0, 0, 3, 3)));
+        tvec.copyTo(Pose(cv::Rect(3, 0, 1, 3)));
+        cv::Mat projMatrix = intrinsics*Pose;
+
+        kf_projmatrix_out << projMatrix << std::endl;
+
+
+    }
+
+    for(auto p3d_it = map_.begin(); p3d_it != map_.end(); p3d_it++){
+
+        fprintf(map_out, "%lf %lf %lf\n",p3d_it->second.x, p3d_it->second.y, p3d_it->second.z);
+    }
+
+    fclose(map_out);
+    kf_ext_out.close();
+
+}
+
+
 
 
 /********** FRAME ************/
