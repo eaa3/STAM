@@ -61,12 +61,13 @@ public:
 
     bool init(cv::Mat image);
 
-    void process(cv::Mat image);
+    Frame::Ptr process(cv::Mat image);
 
     void optimise();
     void dump();
     std::list<Frame::Ptr> key_frames_;
 
+    cv::Mat intrinsics_;
 private:
 
 
@@ -95,7 +96,7 @@ private:
 
     vo_utils::GenericMatcher matcher;
 
-    cv::Mat intrinsics_, distortion_;
+    cv::Mat distortion_;
 
     Params params;
 

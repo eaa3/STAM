@@ -47,9 +47,9 @@ bool STAM::init(cv::Mat image){
 }
 
 
-void STAM::process(cv::Mat image){
+Frame::Ptr STAM::process(cv::Mat image){
     if( image.empty() )
-        return;
+        return Frame::Ptr();
 
     Frame::Ptr current_frame = Frame::Ptr(new Frame(image));
 
@@ -66,10 +66,18 @@ void STAM::process(cv::Mat image){
 
 
     current_frame->projMatrix = calcProjMatrix(false, current_frame->r, current_frame->t);
-    if( current_frame->r.rows*current_frame->r.cols != 3 || current_frame->t.cols*current_frame->t.rows != 3){
-        printf("LOOOOOLLL");
-        cv::waitKey(0);
-    }
+
+    cv::Mat R1 = current_frame->projMatrix(cv::Range::all(), cv::Range(0, 3));
+    cv::Mat T1 = current_frame->projMatrix(cv::Range::all(), cv::Range(3, 4));
+
+    cv::Mat Pose(3, 4, CV_64FC1);
+    cv::Mat pos, R;
+    R = R1.inv();
+    pos = R * T1;
+
+    R.copyTo(Pose(cv::Rect(0, 0, 3, 3)));
+    pos.copyTo(Pose(cv::Rect(3, 0, 1, 3)));
+    current_frame->pose = Pose;
 
     // for S01: baseline= 175
     // for S02: baseline= 50
@@ -78,7 +86,7 @@ void STAM::process(cv::Mat image){
     // last keyframe
     Frame::Ptr key_frame = key_frames_.back();
 
-    bool enough_baseline = has_enough_baseline(intrinsics_.inv()*key_frame->projMatrix, intrinsics_.inv()*current_frame->projMatrix, params.baseline_thr);
+    bool enough_baseline = has_enough_baseline(key_frame->projMatrix, current_frame->projMatrix, params.baseline_thr);
 
     if (enough_baseline) { // keyframe interval // change here from 5 to any other number
         current_frame->detectAndDescribe();
@@ -90,7 +98,7 @@ void STAM::process(cv::Mat image){
 
     //previousFrame = currentFrame;
 
-
+    return current_frame;
     /*
     currentFrame = Frame::Ptr(new Frame(*previousFrame));
 
@@ -234,13 +242,13 @@ cv::Mat STAM::calcProjMatrix(bool use_guess, cv::Mat& guess_r, cv::Mat& guess_t)
 
     cv::solvePnPRansac(points3d, points2d, intrinsics_, distortion_, guess_r, guess_t, use_guess, 100, 5.0, 0.99);
     cv::Mat rvec = guess_r, tvec = guess_t;
-    cv::Mat R;
+    cv::Mat R(3, 3, CV_64FC1);
     cv::Rodrigues(rvec, R);
 
     cv::Mat Pose(3,4, R.type());
     R.copyTo(Pose(cv::Rect(0, 0, 3, 3)));
     tvec.copyTo(Pose(cv::Rect(3, 0, 1, 3)));
-    cv::Mat projMatrix = intrinsics_*Pose;
+    cv::Mat projMatrix = Pose;
 
 //    printProjMatrix();
 
@@ -326,6 +334,8 @@ bool STAM::matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame,
 
     // Points for triangulation (i.e. points in current_frame that doesn't have 3D points already)
     std::vector<int> triangulation_indices;
+    std::vector<cv::Point3f> points3D;
+    std::vector<cv::Point2f> points2D;
     for (int i = 0; i < matches.size(); i++) {
 
         if( key_frame->ids_[matches[i].trainIdx] < 0 ){
@@ -349,12 +359,17 @@ bool STAM::matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame,
             trackset_.points2D_.push_back(pt2);
             trackset_.ids_.push_back(p3d_id);
 
+            points2D.push_back(pt2);
+            points3D.push_back(memory_.map_[p3d_id]);
+
         }
         // marking points which had matches.
         // Later we can use the negation of this mask to extract the points that had no matchings
         mask[matches[i].queryIdx] = true;
 
     }
+
+
 
 
 
@@ -371,7 +386,7 @@ bool STAM::matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame,
     cv::undistortPoints(previousTriangulate, previousTriangulateUnd, intrinsics, distortion);
     cv::undistortPoints(currentTriangulate, currentTriangulateUnd, intrinsics, distortion);
 
-    cv::triangulatePoints(intrinsics.inv()*key_frame->projMatrix, intrinsics.inv()*current_frame->projMatrix, previousTriangulateUnd, currentTriangulateUnd, outputTriangulate);
+    cv::triangulatePoints(key_frame->projMatrix, current_frame->projMatrix, previousTriangulateUnd, currentTriangulateUnd, outputTriangulate);
 
     for (int i = 0; i < triangulation_indices.size(); i++) {
 
@@ -393,7 +408,28 @@ bool STAM::matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame,
         trackset_.points2D_.push_back(p2D);
         trackset_.ids_.push_back(p3d_id);
 
+        points2D.push_back(p2D);
+        points3D.push_back(memory_.map_[p3d_id]);
+
+
     }
+
+
+    // Compute pose again
+//    if( points3D.size() >= 20 ){
+//        cv::Mat guess_r = current_frame->r, guess_t = current_frame->t;
+//        cv::solvePnPRansac(points3D, points2D, intrinsics_, distortion_, guess_r, guess_t, false, 100, 8.0, 0.99);
+//        current_frame->r = guess_r, current_frame->t = guess_t;
+//        cv::Mat R;
+//        cv::Rodrigues(current_frame->r, R);
+
+//        cv::Mat Pose(3,4, R.type());
+//        R.copyTo(Pose(cv::Rect(0, 0, 3, 3)));
+//        current_frame->t.copyTo(Pose(cv::Rect(3, 0, 1, 3)));
+//        current_frame->projMatrix = intrinsics_*Pose;
+//    }
+
+
 
     return true;
 }
@@ -409,7 +445,7 @@ void STAM::projectAndShow(cv::Mat projMatrix, cv::Mat image) {
 
     cv::Mat result;
     result.create(cv::Size(1, 3), CV_64FC1);
-    cv::gemm(projMatrix, point3D, 1, 0, 0, result);
+    cv::gemm(intrinsics_*projMatrix, point3D, 1, 0, 0, result);
 
     //printf("%lf %lf %lf\n", result.at<double>(0), result.at<double>(1), result.at<double>(2));
     //printf("%lf %lf\n", result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2));
@@ -436,11 +472,11 @@ void STAM::projectAndShow(cv::Mat projMatrix, cv::Mat image) {
         p3D.at<double>(1) = it->second.y;
         p3D.at<double>(2) = it->second.z;
         p3D.at<double>(2) = 1;
-        cv::Mat p3DCam = (intrinsics_.inv()*projMatrix)*p3D;
+        cv::Mat p3DCam = (projMatrix)*p3D;
 
         float r = 40.0/(abs(p3D.at<double>(1))+1);
         int ri = 255*r;
-        cv::gemm(projMatrix,  point3D , 1, 0, 0, result);
+        cv::gemm(intrinsics_*projMatrix,  point3D , 1, 0, 0, result);
         cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)),4,cv::Scalar(ri,0,255),-1);
         cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)), 3, cv::Scalar(ri, 255, 255), -1);
         cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)), 2, cv::Scalar(ri, 0, 255), -1);

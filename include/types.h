@@ -72,6 +72,8 @@ public:
     cv::Mat projMatrix;
     cv::Mat t, r;
 
+    cv::Mat pose;
+
     cv::Mat image;
 
     std::vector<cv::KeyPoint> keypoints; // list of keypoints

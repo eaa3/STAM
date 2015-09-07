@@ -214,13 +214,13 @@ void Memory::updateKF(Frame::Ptr keyframe){
 
     cv::Mat intrinsics = it_cam->second;
 
-    cv::Mat R;
+    cv::Mat R(3, 3, CV_64FC1);
     cv::Rodrigues(rvec, R);
 
     cv::Mat Pose(3,4, R.type());
     R.copyTo(Pose(cv::Rect(0, 0, 3, 3)));
     tvec.copyTo(Pose(cv::Rect(3, 0, 1, 3)));
-    cv::Mat projMatrix = intrinsics*Pose;
+    cv::Mat projMatrix = Pose;
 
     keyframe->r = rvec;
     keyframe->t = tvec;
