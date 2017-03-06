@@ -33,7 +33,7 @@ Simple Tracking and Mapping - STAM
 
 ### Building STAM Linux/OSX ###
 
-`` 
+````
 git clone https://github.com/eaa3/STAM.git
 
 cd STAM
@@ -43,4 +43,4 @@ mkdir build
 cmake ..
 
 make -j 
-``
+````
