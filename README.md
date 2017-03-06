@@ -37,4 +37,5 @@ Simple Tracking and Mapping - STAM
    cd STAM
    mkdir build 
    cmake ..
-   make -j ``
+   make -j 
+``
