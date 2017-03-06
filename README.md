@@ -10,5 +10,8 @@ Simple Tracking and Mapping - STAM
 ### Dependencies ###
 
 * OpenCV 2.4.x
-* cvsba
-* LAPACK
+* cvsba (https://www.uco.es/investiga/grupos/ava/node/39)
+* LAPACK (https://pheiter.wordpress.com/2012/09/04/howto-installing-lapack-and-blas-on-mac-os/)
+
+
+### Building STAM ###
