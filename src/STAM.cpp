@@ -15,10 +15,10 @@ int SCENE = 1;
 
 
 double baseline[] = { 175, 50, 35 };
-std::string points2d_init_file[] = { "S01_2Ddata_dst_init.csv", "S02_2Ddata_dst_init.csv", "S03_2Ddata_dst_init.csv" };
-std::string points3d_init_file[] = { "S01_3Ddata_dst_init.csv", "S02_3Ddata_dst_init.csv", "S03_3Ddata_dst_init.csv" };
-std::string intrinsics_file[] = { "intrinsicsS01.xml", "intrinsicsS02.xml", "intrinsicsS03.xml" };
-std::string next_frame_fmt[] = { "S01L03_VGA/S01L03_VGA_%04d.png", "S02L03_VGA/S02L03_VGA_%04d.png", "S03L03_VGA/S03L03_VGA_%04d.png"};
+std::string points2d_init_file[] = { "S01_INPUT/S01_2Ddata_dst_init.csv", "S02_INPUT/S02_2Ddata_dst_init.csv", "S03_INPUT/S03_2Ddata_dst_init.csv" };
+std::string points3d_init_file[] = { "S01_INPUT/S01_3Ddata_dst_init.csv", "S02_INPUT/S02_3Ddata_dst_init.csv", "S03_INPUT/S03_3Ddata_dst_init.csv" };
+std::string intrinsics_file[] = { "S01_INPUT/intrinsicsS01.xml", "S02_INPUT/intrinsicsS02.xml", "S03_INPUT/intrinsicsS03.xml" };
+std::string next_frame_fmt[] = { "S01_INPUT/S01L03_VGA/S01L03_VGA_%04d.png", "S02_INPUT/S02L03_VGA/S02L03_VGA_%04d.png", "S03_INPUT/S03L03_VGA/S03L03_VGA_%04d.png"};
 
 const double THR_BASELINE = baseline[SCENE-1];
 const std::string POINTS_2D_INIT_FILE = points2d_init_file[SCENE-1];

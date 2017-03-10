@@ -40,7 +40,8 @@ int main(int argc, char** argv){
     traj_name << "trajectory_scene" << argv[1] << ".txt";
     std::ofstream traj_out(traj_name.str());
 
-    std::string next_frame_format[] = { "S01L03_VGA/S01L03_VGA_%04d.png", "S02L03_VGA/S02L03_VGA_%04d.png", "S03L03_VGA/S03L03_VGA_%04d.png"};
+    std::string path_prefix[] = { "S01_INPUT" , "S02_INPUT", "S03_INPUT"};
+    std::string next_frame_format[] = { "S01_INPUT/S01L03_VGA/S01L03_VGA_%04d.png", "S02_INPUT/S02L03_VGA/S02L03_VGA_%04d.png", "S03_INPUT/S03L03_VGA/S03L03_VGA_%04d.png"};
     int i = 0;
     STAM.init(video_source.readNextFrame(next_frame_format[SCENE-1]));
 
