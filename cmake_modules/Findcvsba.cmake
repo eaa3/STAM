@@ -25,8 +25,12 @@ SET(cvsba_INCLUDE_DIRS "/usr/local/include")
 LINK_DIRECTORIES("/usr/local/lib")
 SET(cvsba_LIB_DIR "/usr/local/lib")
 
-SET(cvsba_LIBS /usr/lib/libblas.dylib;/usr/lib/liblapack.dylib;/usr/local/lib/libf2c.a;opencv_videostab;opencv_video;opencv_ts;opencv_superres;opencv_stitching;opencv_photo;opencv_ocl;opencv_objdetect;opencv_nonfree;opencv_ml;opencv_legacy;opencv_imgproc;opencv_highgui;opencv_gpu;opencv_flann;opencv_features2d;opencv_core;opencv_contrib;opencv_calib3d cvsba) 
 
+if(UNIX AND NOT APPLE)
+    SET(cvsba_LIBS /usr/lib/libblas.so;/usr/lib/liblapack.so;/usr/lib/libf2c.a;opencv_videostab;opencv_video;opencv_ts;opencv_superres;opencv_stitching;opencv_photo;opencv_ocl;opencv_objdetect;opencv_nonfree;opencv_ml;opencv_legacy;opencv_imgproc;opencv_highgui;opencv_gpu;opencv_flann;opencv_features2d;opencv_core;opencv_contrib;opencv_calib3d cvsba) 
+else()
+	SET(cvsba_LIBS /usr/lib/libblas.dylib;/usr/lib/liblapack.dylib;/usr/local/lib/libf2c.a;opencv_videostab;opencv_video;opencv_ts;opencv_superres;opencv_stitching;opencv_photo;opencv_ocl;opencv_objdetect;opencv_nonfree;opencv_ml;opencv_legacy;opencv_imgproc;opencv_highgui;opencv_gpu;opencv_flann;opencv_features2d;opencv_core;opencv_contrib;opencv_calib3d cvsba) 
+endif()
 SET(cvsba_FOUND YES)
 SET(cvsba_FOUND "YES")
 SET(cvsba_VERSION        1.0.0)
