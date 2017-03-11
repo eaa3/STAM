@@ -1,11 +1,12 @@
 # STAM
+
+This is an opensource version of the code originally used for the level 3 of the ISMAR 2015 Off-site tracking competition.
+Our VoxarLabs team got first place in the level 3 of competition (tracking and mapping).
+
+
 Simple Tracking and Mapping - STAM
 
-### TODO ###
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
 ### Dependencies ###
 
