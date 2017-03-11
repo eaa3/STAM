@@ -1,11 +1,7 @@
-# STAM
+# Simple Tracking and Mapping - STAM
 
 This is an opensource version of the code originally used for the level 3 of the ISMAR 2015 Off-site tracking competition.
-Our VoxarLabs team got first place in the level 3 of competition (tracking and mapping).
-
-
-Simple Tracking and Mapping - STAM
-
+Our team "VoxarLabs" got first place in the level 3 of the competition (tracking and mapping).
 
 
 ### Dependencies ###
@@ -27,9 +23,11 @@ Simple Tracking and Mapping - STAM
   
 ### Installing dependencies on Ubuntu ###
 
+* opencv 2.4.x 
+  * Follow instructions at http://docs.opencv.org/2.4/doc/tutorials/introduction/linux_install/linux_install.html
+
 * cvsba
   * Follow UNIX instructions at https://www.uco.es/investiga/grupos/ava/node/39
-
 
 
 ### Building STAM Linux/OSX ###
