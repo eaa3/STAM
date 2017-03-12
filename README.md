@@ -43,3 +43,24 @@ cmake ..
 
 make -j 
 ````
+
+### Running STAM ###
+
+## Fetch competition data
+````
+cd data
+source fetch_data.bash
+````
+
+## Go to build directory
+````
+cd ../build
+````
+
+## Run demo passing scenario number as argument (example for scenario 1 below)
+````
+./demo_level3 1
+````
+
+
+
