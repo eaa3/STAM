@@ -1,6 +1,6 @@
 # Simple Tracking and Mapping - STAM
 
-This is an opensource version of the code originally used for the level 3 of the [ISMAR 2015 Off-site tracking competition](http://ypcex.naist.jp/trakmark/tracking-competition/).
+This is an open-source version of the code originally used for the level 3 of the [ISMAR 2015 Off-site tracking competition](http://ypcex.naist.jp/trakmark/tracking-competition/).
 Our team "VoxarLabs" got first place in the level 3 of the competition (tracking and mapping).
 
 
