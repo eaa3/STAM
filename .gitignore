@@ -7,4 +7,5 @@ CMakeLists.txt.user
 *.xml
 *.png
 *.zip
+*.zip.*
 S03_3Ddata.csv.1
