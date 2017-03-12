@@ -65,7 +65,7 @@ Example for scenario 1:
 ````
 
 Inline-style: 
-![alt text](https://raw.githubusercontent.com/eaa3/STAM/master/gifs/ismar2015_tracking_S01.gif "Scenario 1")
+![alt text](https://github.com/eaa3/STAM/blob/master/gifs/ismar2015_tracking_S01.gif "Scenario 1")
 
 
 
