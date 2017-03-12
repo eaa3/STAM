@@ -64,7 +64,6 @@ Example for scenario 1:
 ./demo_level3 1
 ````
 
-Inline-style: 
 ![alt text](https://github.com/eaa3/STAM/blob/master/gifs/ismar2015_tracking_S01.gif "Scenario 1")
 
 
