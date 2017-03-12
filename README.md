@@ -6,10 +6,9 @@ Our team "VoxarLabs" got first place in the level 3 of the competition (tracking
 
 ### Dependencies ###
 
-* OpenCV 2.4.x
-* cvsba (https://www.uco.es/investiga/grupos/ava/node/39)
-* LAPACK (https://pheiter.wordpress.com/2012/09/04/howto-installing-lapack-and-blas-on-mac-os/)
-
+* [OpenCV 2.4.x](http://opencv.org/downloads.html)
+* [cvsba](https://www.uco.es/investiga/grupos/ava/node/39)
+* [LAPACK](http://www.netlib.org/lapack/)
 
 ### Installing dependencies on OSX ###
 
