@@ -7,8 +7,8 @@ Our team "VoxarLabs" got first place in the level 3 of the competition (tracking
 ### Dependencies ###
 
 * [OpenCV 2.4.x](http://opencv.org/downloads.html)
-* [cvsba](https://www.uco.es/investiga/grupos/ava/node/39)
 * [LAPACK](http://www.netlib.org/lapack/)
+* [cvsba](https://www.uco.es/investiga/grupos/ava/node/39)
 
 ### Installing dependencies on OSX ###
 
