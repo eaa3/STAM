@@ -7,7 +7,6 @@
  *
  */
 
-
 #ifndef  _VOODOOMETRY_TYPES_
 #define _VOODOOMETRY_TYPES_
 
@@ -40,15 +39,9 @@ public:
     std::vector<int> ids_; // Points3D ids corresponding to each Point2D_
     cv::Mat projMatrix;
     cv::Mat image_;
-
 };
 
-
-
 class Frame {
-
-
-
 public:
 
     typedef std::shared_ptr<Frame> Ptr;
@@ -83,10 +76,8 @@ public:
     int id_; // ID of this frame
 
     void detectAndDescribe();
+    void getQuaternion(double& q1,double& q2,double& q3,double& q4);
 };
-
-
-
 
 class Memory {
 

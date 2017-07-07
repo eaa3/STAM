@@ -283,4 +283,4 @@ cv::Mat GenericMatcher::ransacTest(
 
 
 } // utils namespace
-} // visual odometry namespace
+}

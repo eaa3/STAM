@@ -98,7 +98,7 @@ void Memory::optimise() {
     std::vector< cv::Mat > cameraMatrix, distCoeffs, R, T;
 
     points3D.resize(map_.size());
-    printf(" number of points %d \n", points3D.size());
+    printf(" number of points %lu \n", points3D.size());
     int i = 0;
     for(auto p3d_it = map_.begin(); p3d_it != map_.end(); p3d_it++){
         points3D[i] = p3d_it->second;
@@ -108,7 +108,7 @@ void Memory::optimise() {
     pointsImg.resize(Rs_.size());
     visibility.resize(Rs_.size());
 
-    printf(" number of keyframes %d \n", Rs_.size());
+    printf(" number of keyframes %lu \n", Rs_.size());
 
     int kf_index = 0;
     int kf = 0;
@@ -142,9 +142,9 @@ void Memory::optimise() {
         visibility[kf][p3d_id] = 1;
         pointsImg[kf][p3d_id] = points2D_[p2d_id];
     }
-    printf("projSize %d\n", pointsImg.size());
+    printf("projSize %lu\n", pointsImg.size());
 
-    printf(" number of keyframes %d \n", kf_map.size());
+    printf(" number of keyframes %lu \n", kf_map.size());
     cameraMatrix.resize( kf_map.size() );
     distCoeffs.resize( kf_map.size() );
     R.resize(kf_map.size() );
@@ -160,7 +160,7 @@ void Memory::optimise() {
         distCoeffs[it->second] = dist_coeff_list[it->first];
         cameraMatrix[it->second] = cam_matrix_list[it->first];
     }
-    printf(" input size R T %d %d\n", R.size(), T.size());
+    printf(" input size R T %lu %lu\n", R.size(), T.size());
 
 //    double Sba::run (  std::vector<cv::Point3d>& points,
 //                       const std::vector<std::vector<cv::Point2d> >& imagePoints,
@@ -291,6 +291,48 @@ void Frame::detectAndDescribe() {
 
     ids_.resize(keypoints.size(), -1);
 }
+
+    void Frame::getQuaternion(double& q1,double& q2,double& q3,double& q4)
+    {
+
+        cv::Mat a = pose;
+        double trace = a.at<double>(0,0) + a.at<double>(1,1) + a.at<double>(2,2); // I removed + 1.0f; see discussion with Ethan
+        if( trace > 0 ) 
+        {
+            double s = 0.5 / sqrt(trace+ 1.0);
+            q4 = 0.25 / s;
+            q1 = ( a.at<double>(2,1) - a.at<double>(1,2) ) * s;
+            q2 = ( a.at<double>(0,2) - a.at<double>(2,0) ) * s;
+            q3 = ( a.at<double>(1,0) - a.at<double>(0,1) ) * s;
+        } 
+        else 
+        {
+            if ( a.at<double>(0,0) > a.at<double>(1,1) && a.at<double>(0,0) > a.at<double>(2,2) ) 
+            {
+                double s = 2.0 * sqrt( 1.0 + a.at<double>(0,0) - a.at<double>(1,1) - a.at<double>(2,2));
+                q4 = (a.at<double>(2,1) - a.at<double>(1,2) ) / s;
+                q1 = 0.25 * s;
+                q2 = (a.at<double>(0,1) +  a.at<double>(1,0) ) / s;
+                q3 = (a.at<double>(0,2) + a.at<double>(2,0) ) / s;
+            } 
+            else if (a.at<double>(1,1) > a.at<double>(2,2)) 
+            {
+                double s = 2.0 * sqrt( 1.0 + a.at<double>(1,1) - a.at<double>(0,0) - a.at<double>(2,2));
+                q4 = (a.at<double>(0,2) - a.at<double>(2,0) ) / s;
+                q1 = (a.at<double>(0,1) +  a.at<double>(1,0)) / s;
+                q2 = 0.25 * s;
+                q3 = (a.at<double>(1,2) + a.at<double>(2,1) ) / s;
+            } 
+            else 
+            {
+                double s = 2.0 * sqrt( 1.0 + a.at<double>(2,2) - a.at<double>(0,0) - a.at<double>(1,1) );
+                q4 = (a.at<double>(1,0) - a.at<double>(0,1) ) / s;
+                q1 = (a.at<double>(0,2) + a.at<double>(2,0) ) / s;
+                q2 = (a.at<double>(1,2) + a.at<double>(2,1)) / s;
+                q3 = 0.25 * s;
+            }
+        }
+    }
 
 
 }

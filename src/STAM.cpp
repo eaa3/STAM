@@ -9,12 +9,10 @@
 
 #include "STAM.h"
 
-
-
 int SCENE = 1;
 
 
-double baseline[] = { 175, 50, 35 };
+double baseline[] = { 175, 50, 80 };
 std::string points2d_init_file[] = { "S01_INPUT/S01_2Ddata_dst_init.csv", "S02_INPUT/S02_2Ddata_dst_init.csv", "S03_INPUT/S03_2Ddata_dst_init.csv" };
 std::string points3d_init_file[] = { "S01_INPUT/S01_3Ddata_dst_init.csv", "S02_INPUT/S02_3Ddata_dst_init.csv", "S03_INPUT/S03_3Ddata_dst_init.csv" };
 std::string intrinsics_file[] = { "S01_INPUT/intrinsicsS01.xml", "S02_INPUT/intrinsicsS02.xml", "S03_INPUT/intrinsicsS03.xml" };
@@ -47,7 +45,7 @@ bool STAM::init(cv::Mat image){
 }
 
 
-Frame::Ptr STAM::process(cv::Mat image){
+Frame::Ptr STAM::process(cv::Mat image, bool visualize_flag){
     if( image.empty() )
         return Frame::Ptr();
 
@@ -64,7 +62,6 @@ Frame::Ptr STAM::process(cv::Mat image){
     }
 
 
-
     current_frame->projMatrix = calcProjMatrix(false, current_frame->r, current_frame->t);
 
     cv::Mat R1 = current_frame->projMatrix(cv::Range::all(), cv::Range(0, 3));
@@ -73,11 +70,13 @@ Frame::Ptr STAM::process(cv::Mat image){
     cv::Mat Pose(3, 4, CV_64FC1);
     cv::Mat pos, R;
     R = R1.inv();
-    pos = R * T1;
+    pos = (-R) * T1;
 
     R.copyTo(Pose(cv::Rect(0, 0, 3, 3)));
     pos.copyTo(Pose(cv::Rect(3, 0, 1, 3)));
     current_frame->pose = Pose;
+    // std::cout << " R " << R << " pos " << pos << std::endl;
+    // std:: cout << Pose << std::endl;
 
     // for S01: baseline= 175
     // for S02: baseline= 50
@@ -93,8 +92,8 @@ Frame::Ptr STAM::process(cv::Mat image){
 
         mapping(key_frame, current_frame);
     }
-
-    projectAndShow(current_frame->projMatrix, image);
+    if (visualize_flag)
+        projectAndShow(current_frame->projMatrix, image);
 
     //previousFrame = currentFrame;
 
@@ -223,18 +222,18 @@ cv::Mat STAM::calcProjMatrix(bool use_guess, cv::Mat& guess_r, cv::Mat& guess_t)
     }
 
 
-    //        bool cv::solvePnPRansac	(	InputArray 	objectPoints,
-    //        InputArray 	imagePoints,
-    //        InputArray 	cameraMatrix,
-    //        InputArray 	distCoeffs,
-    //        OutputArray 	rvec,
-    //        OutputArray 	tvec,
-    //        bool 	useExtrinsicGuess = false,
-    //        int 	iterationsCount = 100,
-    //        float 	reprojectionError = 8.0,
-    //        double 	confidence = 0.99,
-    //        OutputArray 	inliers = noArray(),
-    //        int 	flags = SOLVEPNP_ITERATIVE
+    //        bool cv::solvePnPRansac   (   InputArray  objectPoints,
+    //        InputArray    imagePoints,
+    //        InputArray    cameraMatrix,
+    //        InputArray    distCoeffs,
+    //        OutputArray   rvec,
+    //        OutputArray   tvec,
+    //        bool  useExtrinsicGuess = false,
+    //        int   iterationsCount = 100,
+    //        float     reprojectionError = 8.0,
+    //        double    confidence = 0.99,
+    //        OutputArray   inliers = noArray(),
+    //        int   flags = SOLVEPNP_ITERATIVE
     //        )
 
 
@@ -249,6 +248,7 @@ cv::Mat STAM::calcProjMatrix(bool use_guess, cv::Mat& guess_r, cv::Mat& guess_t)
     R.copyTo(Pose(cv::Rect(0, 0, 3, 3)));
     tvec.copyTo(Pose(cv::Rect(3, 0, 1, 3)));
     cv::Mat projMatrix = Pose;
+
 
 //    printProjMatrix();
 
@@ -323,13 +323,13 @@ bool STAM::matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame,
 
 
 
-    LOG("NMatches %d\n",matches.size());
+    LOG("NMatches %lu\n",matches.size());
 
     if( !matches.size() )
         return false;
 
     std::vector<cv::Point2f> previousTriangulate, currentTriangulate;
-    cv::Mat	outputTriangulate;
+    cv::Mat outputTriangulate;
     outputTriangulate.create(cv::Size(4, matches.size()), CV_32FC1);
 
     // Points for triangulation (i.e. points in current_frame that doesn't have 3D points already)
@@ -337,11 +337,9 @@ bool STAM::matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame,
     std::vector<cv::Point3f> points3D;
     std::vector<cv::Point2f> points2D;
     for (int i = 0; i < matches.size(); i++) {
-
         if( key_frame->ids_[matches[i].trainIdx] < 0 ){
             cv::Point pt1 = key_frame->keypoints[matches[i].trainIdx].pt;
             cv::Point pt2 = current_frame->keypoints[matches[i].queryIdx].pt;
-
             previousTriangulate.push_back(pt1);
             currentTriangulate.push_back(pt2);
 
@@ -369,17 +367,10 @@ bool STAM::matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame,
 
     }
 
-
-
-
-
     if( previousTriangulate.size() == 0 || currentTriangulate.size() == 0 ){
         //LOG("Triangulation Points %d %d\n",previousTriangulate.size(),currentTriangulate.size());
         return false;
     }
-
-
-
 
     // undistort
     std::vector<cv::Point2f> previousTriangulateUnd, currentTriangulateUnd;
@@ -442,15 +433,15 @@ void STAM::projectAndShow(cv::Mat projMatrix, cv::Mat image) {
     point3D.at<double>(1) = -264;
     point3D.at<double>(2) = 300;
     point3D.at<double>(3) = 1;
-
+    bool marker_flag = false;
     cv::Mat result;
     result.create(cv::Size(1, 3), CV_64FC1);
     cv::gemm(intrinsics_*projMatrix, point3D, 1, 0, 0, result);
 
     //printf("%lf %lf %lf\n", result.at<double>(0), result.at<double>(1), result.at<double>(2));
     //printf("%lf %lf\n", result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2));
-
     cv::Mat imcopy = image.clone();
+    if (marker_flag){
     cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)),4,cv::Scalar(0,0,255),-1);
     cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)), 3, cv::Scalar(255, 255, 255), -1);
     cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)), 2, cv::Scalar(0, 0, 255), -1);
@@ -485,7 +476,7 @@ void STAM::projectAndShow(cv::Mat projMatrix, cv::Mat image) {
 
     }
 
-
+}
 
     cv::imshow("frame", imcopy);
     if (cv::waitKey(1) == 27) {

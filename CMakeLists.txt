@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 2.8)
 project (STAM)
 
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules/ )
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/ )
 
 # The version number.
 #set (Tutorial_VERSION_MAJOR 1)
 #set (Tutorial_VERSION_MINOR 0)
  
-include_directories("${PROJECT_SOURCE_DIR}/src/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/include")
 
 #########################################################
-# FIND OPENCV
+# FIND OPENCV AND SPARSE BUNDLE ADJUSTMENT PACKAGE
 #########################################################
 find_package( OpenCV REQUIRED )
 
@@ -21,37 +21,38 @@ find_package(cvsba REQUIRED )
 #########################################################
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(STAM_INC_DIR "include")
-set(STAM_SRC_DIR "src")
+set(STAM_INC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(STAM_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
-include_directories( ${STAM_INC_DIR} )
+include_directories( ${STAM_INC} )
 
-set(STAM_INC "${STAM_INC_DIR}/STAM.h"
-               "${STAM_INC_DIR}/types.h"
-               "${STAM_INC_DIR}/utils.h"
-               "${STAM_INC_DIR}/VideoSource.h"
+# set(VODOM_INC "${VIS_ODOM_INC}/STAM.h"
+#                "${VIS_ODOM_INC}/types.h"
+#                "${VIS_ODOM_INC}/utils.h"
+#                "${VIS_ODOM_INC}/VideoSource.h"
 
-    )
+#     )
 
-set(STAM_SRC "${STAM_SRC_DIR}/STAM.cpp"
+set(STAM_LIBs "${STAM_SRC_DIR}/STAM.cpp"
+                "${STAM_SRC_DIR}/cvsba_simple_test.cpp"
                "${STAM_SRC_DIR}/types.cpp"
                "${STAM_SRC_DIR}/utils.cpp"
                "${STAM_SRC_DIR}/VideoSource.cpp"
 
    )
 
-add_library( stam ${STAM_INC} ${STAM_SRC})
+add_library( vostam SHARED ${STAM_LIBs})
 
-add_executable( demo_level3 "${STAM_SRC_DIR}/main.cpp" )
+add_executable( demo ${STAM_SRC_DIR}/main.cpp )
 
-add_executable(cvsba_simple_test src/cvsba_simple_test.cpp)
+# add_executable(cvsba_simple_test ${STAM_SRC_DIR}/cvsba_simple_test.cpp)
+target_link_libraries(demo ${OpenCV_LIBS} ${cvsba_LIBS} vostam)
 
-target_link_libraries(demo_level3 ${OpenCV_LIBS} ${cvsba_LIBS} stam)
+# target_link_libraries(cvsba_simple_test ${OpenCV_LIBS} ${cvsba_LIBS})
 
-target_link_libraries(cvsba_simple_test ${OpenCV_LIBS} ${cvsba_LIBS})
+target_link_libraries(vostam ${OpenCV_LIBS} ${cvsba_LIBS})
 
-target_link_libraries( demo_level3 ${OpenCV_LIBS} ${cvsba_LIBS})
-
+# target_link_libraries(demo ${OpenCV_LIBS} ${cvsba_LIBS})
 
 
 

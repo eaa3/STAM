@@ -7,23 +7,24 @@
  *
  */
 
-
 #ifndef _VOODOOMETRY_
 #define _VOODOOMETRY_
 
 #include <map>
+#include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 
+#include <vector>
 #include <stdio.h>
 #include <iostream>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/features2d/features2d.hpp"
-#include "opencv2/nonfree/nonfree.hpp"
+#include <opencv2/nonfree/nonfree.hpp>
 #include "opencv2/video/video.hpp"
 
 #include <utils.h>
 
-#include <vector>
+#include <list>
 
 #include "types.h"
 #include "utils.h"
@@ -31,7 +32,6 @@
 #include <algorithm>
 
 #include <cvsba/cvsba.h>
-
 namespace vo_utils = visual_odometry::utils;
 
 extern int SCENE;
@@ -39,8 +39,6 @@ extern int SCENE;
 namespace visual_odometry {
 
 class STAM {
-
-
 
 public:
 
@@ -61,7 +59,7 @@ public:
 
     bool init(cv::Mat image);
 
-    Frame::Ptr process(cv::Mat image);
+    Frame::Ptr process(cv::Mat image, bool visualize_flag);
 
     void optimise();
     void dump();
@@ -104,7 +102,7 @@ private:
 
 };
 
-}
+} // namespace visual_odometry
 
 
 
