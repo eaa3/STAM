@@ -33,7 +33,7 @@ include_directories( ${STAM_INC} )
 
 #     )
 
-set(STAM_LIBs "${STAM_SRC_DIR}/STAM.cpp"
+set(STAM_LIBS "${STAM_SRC_DIR}/STAM.cpp"
                 "${STAM_SRC_DIR}/cvsba_simple_test.cpp"
                "${STAM_SRC_DIR}/types.cpp"
                "${STAM_SRC_DIR}/utils.cpp"
@@ -41,7 +41,7 @@ set(STAM_LIBs "${STAM_SRC_DIR}/STAM.cpp"
 
    )
 
-add_library( vostam SHARED ${STAM_LIBs})
+add_library( vostam SHARED ${STAM_LIBS})
 
 add_executable( demo ${STAM_SRC_DIR}/main.cpp )
 

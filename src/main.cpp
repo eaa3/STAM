@@ -13,6 +13,7 @@
 #include <fstream>
 
 namespace vo = visual_odometry;
+bool visualize_flag;
 
 int main(int argc, char** argv){
 
@@ -28,6 +29,12 @@ int main(int argc, char** argv){
              printf(" usage: ./stam <scene_number>\n where <scene_number> = 1|2|3\n\n");
              exit(1);
         }
+        if ( argc == 3 )
+        {
+            int flag = atoi(argv[2]);
+            visualize_flag = (flag == 1); 
+        }
+        else visualize_flag = false;
 
 
     }
@@ -48,7 +55,7 @@ int main(int argc, char** argv){
     visual_odometry::Frame::Ptr current_frame;
     while( !(frame = video_source.readNextFrame(next_frame_format[SCENE-1])).empty() ){
 
-        current_frame = vOdom.process(frame,false);
+        current_frame = vOdom.process(frame,visualize_flag);
 
 
         if( SCENE > 1 && i%300 == 0 )
