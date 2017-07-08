@@ -17,12 +17,14 @@ std::string points2d_init_file[] = { "S01_INPUT/S01_2Ddata_dst_init.csv", "S02_I
 std::string points3d_init_file[] = { "S01_INPUT/S01_3Ddata_dst_init.csv", "S02_INPUT/S02_3Ddata_dst_init.csv", "S03_INPUT/S03_3Ddata_dst_init.csv" };
 std::string intrinsics_file[] = { "S01_INPUT/intrinsicsS01.xml", "S02_INPUT/intrinsicsS02.xml", "S03_INPUT/intrinsicsS03.xml" };
 std::string next_frame_fmt[] = { "S01_INPUT/S01L03_VGA/S01L03_VGA_%04d.png", "S02_INPUT/S02L03_VGA/S02L03_VGA_%04d.png", "S03_INPUT/S03L03_VGA/S03L03_VGA_%04d.png"};
+std::string template_file_fmt[] = {"S01_INPUT/S01L03_patch/S01L03_VGA_patch_%04d.png", "S02_INPUT/S02L03_patch/S02L03_VGA_patch_%04d.png", "S03_INPUT/S03L03_VGA_patch/S03L03_VGA_patch_%04d.png"};
 
 const double THR_BASELINE = baseline[SCENE-1];
 const std::string POINTS_2D_INIT_FILE = points2d_init_file[SCENE-1];
 const std::string POINTS_3D_INIT_FILE = points3d_init_file[SCENE-1];
 const std::string INTRINSICS_FILE = intrinsics_file[SCENE-1];
 const std::string NEXT_FRAME_FMT = next_frame_fmt[SCENE-1];
+const std::string TEMPL_FILE_FMT = template_file_fmt[SCENE-1];
 
 namespace visual_odometry {
 
@@ -35,9 +37,11 @@ bool STAM::init(cv::Mat image){
     params.POINTS_3D_INIT_FILE = points3d_init_file[SCENE-1];
     params.INTRINSICS_FILE = intrinsics_file[SCENE-1];
     params.NEXT_FRAME_FMT = next_frame_fmt[SCENE-1];
+    params.TEMPL_FILE_FMT = template_file_fmt[SCENE-1];
 
     loadIntrinsicsFromFile(params.INTRINSICS_FILE);
-    initFromFiles(image, params.POINTS_2D_INIT_FILE, params.POINTS_3D_INIT_FILE);
+    // initFromFiles(image, params.POINTS_2D_INIT_FILE, params.POINTS_3D_INIT_FILE);
+    initFromTemplates(image, params.POINTS_3D_INIT_FILE, params.TEMPL_FILE_FMT);
 
 
     return true;
@@ -166,6 +170,62 @@ void STAM::loadIntrinsicsFromFile(const std::string& filename){
     }
 }
 
+void STAM::initFromTemplates(cv::Mat image, const std::string& p3D_filename, const std::string& template_format)
+{   // use template matching to find the 2D image coordinates of the given patches and match the corresponding 3D coordinates
+    cv::Point3f p3D;
+    cv::Point2f p2D;
+    FILE *p3D_f = fopen(p3D_filename.c_str(), "r");
+    int findex = 0;
+    cv::Mat templ;  
+
+    Frame::Ptr frame(new Frame(image));
+    trackset_.image_ = image;
+    cv::cvtColor(image, image, CV_BGR2GRAY);
+
+    while (fscanf(p3D_f, "%f,%f,%f", &p3D.x, &p3D.y, &p3D.z) == 3)
+    {
+        char buf[256];
+        sprintf(buf, template_format.c_str(), findex++);
+        templ = cv::imread(buf,0);
+
+        // ------Uncomment to reduce template size. may speed up the process
+
+        // resize(templ,templ,Size(templ.cols/1.5,templ.rows/1.5));
+
+        // -------------
+
+        cv::Mat result(image.rows - templ.rows + 1,image.cols - templ.cols + 1,CV_32FC1);
+
+        cv::matchTemplate(image,templ,result,CV_TM_CCOEFF_NORMED);
+
+        double maxv; cv::Point maxp;
+        cv::minMaxLoc(result,0,&maxv,0,&maxp);
+        p2D.x = ((2*maxp.x)+templ.cols)/2;
+        p2D.y = ((2*maxp.y)+templ.rows)/2;
+
+        auto added_ids = memory_.addCorrespondence(frame->id_, p2D, p3D);
+        frame->keypoints.push_back( cv::KeyPoint(p2D.x, p2D.y, 1) );
+
+        frame->ids_.push_back( added_ids.first );
+
+        trackset_.points2D_.push_back( p2D );
+        trackset_.ids_.push_back( added_ids.first );
+    }
+
+    frame->detectAndDescribe();
+
+    frame->projMatrix = calcProjMatrix(false, frame->r, frame->t);
+    trackset_.projMatrix = frame->projMatrix;
+
+    key_frames_.push_back(frame);
+
+    // Not used
+    previous_frame_ = frame;
+
+    memory_.addKeyFrame(frame->id_, frame->r, frame->t, intrinsics_, distortion_(cv::Range(0,1),cv::Range(0,5)));
+
+    fclose(p3D_f);
+}
 
 void STAM::initFromFiles(cv::Mat image, const std::string& p2D_filename, const std::string& p3D_filename){
     FILE *p2D_f = fopen(p2D_filename.c_str(), "r");

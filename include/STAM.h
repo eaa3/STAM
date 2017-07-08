@@ -51,6 +51,7 @@ public:
         std::string POINTS_3D_INIT_FILE;
         std::string INTRINSICS_FILE;
         std::string NEXT_FRAME_FMT;
+        std::string TEMPL_FILE_FMT;
 
     };
 
@@ -75,6 +76,8 @@ private:
     void loadIntrinsicsFromFile(const std::string& filename);
 
     void initFromFiles(cv::Mat image, const std::string& p2D_filename, const std::string& p3D_filename);
+
+    void initFromTemplates(cv::Mat image, const std::string& p3D_filename, const std::string& template_format);
 
     void updateUsingKLT(cv::Mat image);
 
