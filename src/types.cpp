@@ -295,7 +295,7 @@ void Frame::detectAndDescribe() {
     void Frame::getQuaternion(double& q1,double& q2,double& q3,double& q4)
     {
 
-        cv::Mat a = pose;
+        const cv::Mat a = pose;
         double trace = a.at<double>(0,0) + a.at<double>(1,1) + a.at<double>(2,2); // I removed + 1.0f; see discussion with Ethan
         if( trace > 0 ) 
         {
@@ -332,6 +332,16 @@ void Frame::detectAndDescribe() {
                 q3 = 0.25 * s;
             }
         }
+
+        // Use Eigen for quaternion calculation -- same results
+
+        // Eigen::Matrix3f A_Eigen;
+        // cv::cv2eigen(a,A_Eigen);
+        // Eigen::Quaternionf Q(A_Eigen);
+        // Q.normalize();
+        // q1 = Q.coeffs()[0]; q2 = Q.coeffs()[1]; q3 = Q.coeffs()[2]; q4 = Q.coeffs()[3];
+
+        // -----------------------------------------------------------
     }
 
 

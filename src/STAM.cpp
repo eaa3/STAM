@@ -102,40 +102,6 @@ Frame::Ptr STAM::process(cv::Mat image, bool visualize_flag){
     //previousFrame = currentFrame;
 
     return current_frame;
-    /*
-    currentFrame = Frame::Ptr(new Frame(*previousFrame));
-
-    currentFrame->readNextFrame(NEXT_FRAME_FMT);
-
-    currentFrame->updateUsingKLT(*previousFrame);
-
-
-    currentFrame->calcProjMatrix();
-
-    // for S01: baseline= 175
-    // for S02: baseline= 50
-    // for S03: baseline= 25 or 40
-
-
-    bool enough_baseline = has_enough_baseline(keyFrame->intrinsic.inv()*keyFrame->projMatrix, currentFrame->intrinsic.inv()*currentFrame->projMatrix, THR_BASELINE);
-    LOG("BEFORE: %d\t", currentFrame->squareFeatures.size());
-    if (enough_baseline) { // keyframe interval // change here from 5 to any other number
-        currentFrame->detectAndDescribe();
-
-        LOG("BEFORE: %d\t", currentFrame->squareFeatures.size());
-        matchAndTriangulate(*keyFrame, *currentFrame, currentFrame->intrinsic, currentFrame->distortion);
-        LOG("AFTER: %d\n", currentFrame->squareFeatures.size());
-
-        keyFrame = currentFrame;
-        // This is extremely important (otherwise all Frames will have a common projMatrix in the memory)
-        keyFrame->projMatrix = currentFrame->projMatrix.clone();
-        keyFrame->descriptors = currentFrame->descriptors.clone();
-        keyFrame->r = currentFrame->r.clone();
-        keyFrame->t = currentFrame->t.clone();
-    }
-
-
-    previousFrame = currentFrame;*/
 
 }
 

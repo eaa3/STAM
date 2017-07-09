@@ -16,6 +16,9 @@ find_package( OpenCV REQUIRED )
 
 find_package(cvsba REQUIRED )
 
+find_package( Eigen3 REQUIRED ) # for rot matrix to quaternion conversion
+include_directories( ${EIGEN3_INCLUDE_DIR} )
+
 ########################################################
 # Linking & stuff
 #########################################################
@@ -50,7 +53,7 @@ target_link_libraries(demo ${OpenCV_LIBS} ${cvsba_LIBS} vostam)
 
 # target_link_libraries(cvsba_simple_test ${OpenCV_LIBS} ${cvsba_LIBS})
 
-target_link_libraries(vostam ${OpenCV_LIBS} ${cvsba_LIBS})
+target_link_libraries(vostam ${OpenCV_LIBS} ${cvsba_LIBS} ${Eigen3_LIBS})
 
 # target_link_libraries(demo ${OpenCV_LIBS} ${cvsba_LIBS})
 
