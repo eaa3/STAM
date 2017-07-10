@@ -83,6 +83,7 @@ public:
 
     void detectAndDescribe();
     void getQuaternion(double& q1,double& q2,double& q3,double& q4);
+    cv::Mat getCurrentPose();
     // std::vector<cv::KeyPoint> getKeypoints();
 };
 
@@ -142,7 +143,12 @@ public:
 
 
 };
-
+std::string type2str(int type); /* Find type of matrix
+**
+* Use the following code (a is the matrix)
+    std::string ty =  type2str( a.type() );
+    printf("Matrix: %s %dx%d \n", ty.c_str(), a.cols, a.rows );
+*/
 
 }
 

@@ -296,6 +296,9 @@ void Frame::getQuaternion(double& q1,double& q2,double& q3,double& q4)
 {
 
     const cv::Mat a = pose;
+    // std::cout << a << std::endl;
+    // std::string ty =  type2str( a.type() );
+    // printf("Matrix: %s %dx%d \n", ty.c_str(), a.cols, a.rows );
     double trace = a.at<double>(0,0) + a.at<double>(1,1) + a.at<double>(2,2); // I removed + 1.0f; see discussion with Ethan
     if( trace > 0 ) 
     {
@@ -342,6 +345,46 @@ void Frame::getQuaternion(double& q1,double& q2,double& q3,double& q4)
     // q1 = Q.coeffs()[0]; q2 = Q.coeffs()[1]; q3 = Q.coeffs()[2]; q4 = Q.coeffs()[3];
 
     // -----------------------------------------------------------
+}
+
+cv::Mat Frame::getCurrentPose()
+{
+    cv::Mat a = pose;
+    cv::Mat row = (cv::Mat_<double>(1,4) << 0, 0, 0, 1);
+    a.push_back(row);
+    return a;
+    
+    // return posemat;
+    
+}
+
+// Find type of matrix
+/**
+* Use the following code (a is the matrix)
+    std::string ty =  type2str( a.type() );
+    printf("Matrix: %s %dx%d \n", ty.c_str(), a.cols, a.rows );
+*/
+std::string type2str(int type) {
+  std::string r;
+
+  uchar depth = type & CV_MAT_DEPTH_MASK;
+  uchar chans = 1 + (type >> CV_CN_SHIFT);
+
+  switch ( depth ) {
+    case CV_8U:  r = "8U"; break;
+    case CV_8S:  r = "8S"; break;
+    case CV_16U: r = "16U"; break;
+    case CV_16S: r = "16S"; break;
+    case CV_32S: r = "32S"; break;
+    case CV_32F: r = "32F"; break;
+    case CV_64F: r = "64F"; break;
+    default:     r = "User"; break;
+  }
+
+  r += "C";
+  r += (chans+'0');
+
+  return r;
 }
 
 
