@@ -35,6 +35,7 @@
 namespace visual_odometry {
 
 typedef unsigned int Identifier;
+typedef std::pair<std::vector<cv::Point3d> , std::vector<cv::Point2d>> ProjectionCorrespondences;
 
 // Has only square features
 class TrackSet{
@@ -43,6 +44,7 @@ public:
     std::vector<int> ids_; // Points3D ids corresponding to each Point2D_
     cv::Mat projMatrix;
     cv::Mat image_;
+    // std::map<int, std::vector<cv::Point3d>> frame_kpts_; // keyframe id -> vector of 3d points observed
 };
 
 class Frame {
@@ -81,6 +83,7 @@ public:
 
     void detectAndDescribe();
     void getQuaternion(double& q1,double& q2,double& q3,double& q4);
+    // std::vector<cv::KeyPoint> getKeypoints();
 };
 
 class Memory {
@@ -96,6 +99,7 @@ public:
 
     std::map<int, cv::Mat> Rs_; // keyframe id -> Rotation Matrix
     std::map<int, cv::Mat> Ts_; // keyframe id -> Translation Vector
+
 
     // keyframe id -> [ pair(point3D id, point2D id) ]
     // => Projection (point2D id) of point3D on Keyframe with given keyframe id
@@ -125,6 +129,7 @@ public:
     std::pair<int,int> addCorrespondence(int key_frame_id, cv::Point2d p2D, int point3d_id);
     std::pair<int,int> addCorrespondence(int key_frame_id, cv::Point2f p2D, int point3d_id);
 
+    // std::map<int,cv::Point3d> getLast3dPoints(){return }
 
     // return: (p3d_id, p2d_id)
     std::pair<int,int> addCorrespondence(int key_frame_id, int point2d_id, int point3d_id);

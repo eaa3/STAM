@@ -6,7 +6,7 @@
  * @version 1.0
  *
  */
-
+#include <typeinfo>////
 #include "STAM.h"
 
 int SCENE = 1;
@@ -61,6 +61,31 @@ bool STAM::init(cv::Mat image, std::string next_frame_fmt, std::string intrinsic
     initFromTemplates(image,params.POINTS_3D_INIT_FILE, params.TEMPL_FILE_FMT);
 }
 
+ProjectionCorrespondences STAM::getKeypointsInFrame(int key_frame_id)
+{
+    std::pair <std::multimap<int, std::pair< int, int > >::iterator, std::multimap<int, std::pair< int, int > >::iterator> ret;
+    ret = memory_.projections_.equal_range(key_frame_id);
+    // std::cout << ret->first << std::endl;
+    // std::cout << "type" << typeid(memory_.projections_).name() << std::endl;
+    // std::cout << key_frame_id << " =>";
+    std::vector<cv::Point3d> p3d_vec;
+    std::vector<cv::Point2d> p2d_vec;
+    for (std::multimap<int, std::pair< int, int > >::iterator it=ret.first; it!=ret.second; ++it)
+    {
+        // std::cout << ' ' << it->first << ' ' << it->second.second << " " << it->second.second << std::endl;
+        int p3d_id = it->second.first; int p2d_id = it->second.second;
+        cv::Point3d p3d = memory_.map_.find(p3d_id)->second;
+        cv::Point2d p2d = memory_.points2D_.find(p2d_id)->second;
+        p3d_vec.push_back(p3d);
+        p2d_vec.push_back(p2d);
+      // std::cout << p3d << std::endl << p2d << std::endl;
+    }
+    // std::cout << p3d_vec << std::endl;
+    // std::cout << p2d_vec << std::endl;
+    return std::make_pair(p3d_vec,p2d_vec);  
+
+    // std::cout << '\n';
+}
 
 Frame::Ptr STAM::process(cv::Mat image, bool visualize_flag){
     if( image.empty() )
@@ -160,6 +185,7 @@ void STAM::initFromTemplates(cv::Mat image, const std::string& p3D_filename, con
     Frame::Ptr frame(new Frame(image));
     trackset_.image_ = image;
     cv::cvtColor(image, image, CV_BGR2GRAY);
+    // std::cout << " frame " << frame->id_ << std::endl;
 
     while (fscanf(p3D_f, "%f,%f,%f", &p3D.x, &p3D.y, &p3D.z) == 3)
     {

@@ -64,6 +64,8 @@ public:
 
     Frame::Ptr process(cv::Mat image, bool visualize_flag);
 
+    ProjectionCorrespondences getKeypointsInFrame(int key_frame_id);
+
     void optimise();
     void dump();
     std::list<Frame::Ptr> key_frames_;
