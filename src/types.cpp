@@ -292,57 +292,57 @@ void Frame::detectAndDescribe() {
     ids_.resize(keypoints.size(), -1);
 }
 
-    void Frame::getQuaternion(double& q1,double& q2,double& q3,double& q4)
-    {
+void Frame::getQuaternion(double& q1,double& q2,double& q3,double& q4)
+{
 
-        const cv::Mat a = pose;
-        double trace = a.at<double>(0,0) + a.at<double>(1,1) + a.at<double>(2,2); // I removed + 1.0f; see discussion with Ethan
-        if( trace > 0 ) 
+    const cv::Mat a = pose;
+    double trace = a.at<double>(0,0) + a.at<double>(1,1) + a.at<double>(2,2); // I removed + 1.0f; see discussion with Ethan
+    if( trace > 0 ) 
+    {
+        double s = 0.5 / sqrt(trace+ 1.0);
+        q4 = 0.25 / s;
+        q1 = ( a.at<double>(2,1) - a.at<double>(1,2) ) * s;
+        q2 = ( a.at<double>(0,2) - a.at<double>(2,0) ) * s;
+        q3 = ( a.at<double>(1,0) - a.at<double>(0,1) ) * s;
+    } 
+    else 
+    {
+        if ( a.at<double>(0,0) > a.at<double>(1,1) && a.at<double>(0,0) > a.at<double>(2,2) ) 
         {
-            double s = 0.5 / sqrt(trace+ 1.0);
-            q4 = 0.25 / s;
-            q1 = ( a.at<double>(2,1) - a.at<double>(1,2) ) * s;
-            q2 = ( a.at<double>(0,2) - a.at<double>(2,0) ) * s;
-            q3 = ( a.at<double>(1,0) - a.at<double>(0,1) ) * s;
+            double s = 2.0 * sqrt( 1.0 + a.at<double>(0,0) - a.at<double>(1,1) - a.at<double>(2,2));
+            q4 = (a.at<double>(2,1) - a.at<double>(1,2) ) / s;
+            q1 = 0.25 * s;
+            q2 = (a.at<double>(0,1) +  a.at<double>(1,0) ) / s;
+            q3 = (a.at<double>(0,2) + a.at<double>(2,0) ) / s;
+        } 
+        else if (a.at<double>(1,1) > a.at<double>(2,2)) 
+        {
+            double s = 2.0 * sqrt( 1.0 + a.at<double>(1,1) - a.at<double>(0,0) - a.at<double>(2,2));
+            q4 = (a.at<double>(0,2) - a.at<double>(2,0) ) / s;
+            q1 = (a.at<double>(0,1) +  a.at<double>(1,0)) / s;
+            q2 = 0.25 * s;
+            q3 = (a.at<double>(1,2) + a.at<double>(2,1) ) / s;
         } 
         else 
         {
-            if ( a.at<double>(0,0) > a.at<double>(1,1) && a.at<double>(0,0) > a.at<double>(2,2) ) 
-            {
-                double s = 2.0 * sqrt( 1.0 + a.at<double>(0,0) - a.at<double>(1,1) - a.at<double>(2,2));
-                q4 = (a.at<double>(2,1) - a.at<double>(1,2) ) / s;
-                q1 = 0.25 * s;
-                q2 = (a.at<double>(0,1) +  a.at<double>(1,0) ) / s;
-                q3 = (a.at<double>(0,2) + a.at<double>(2,0) ) / s;
-            } 
-            else if (a.at<double>(1,1) > a.at<double>(2,2)) 
-            {
-                double s = 2.0 * sqrt( 1.0 + a.at<double>(1,1) - a.at<double>(0,0) - a.at<double>(2,2));
-                q4 = (a.at<double>(0,2) - a.at<double>(2,0) ) / s;
-                q1 = (a.at<double>(0,1) +  a.at<double>(1,0)) / s;
-                q2 = 0.25 * s;
-                q3 = (a.at<double>(1,2) + a.at<double>(2,1) ) / s;
-            } 
-            else 
-            {
-                double s = 2.0 * sqrt( 1.0 + a.at<double>(2,2) - a.at<double>(0,0) - a.at<double>(1,1) );
-                q4 = (a.at<double>(1,0) - a.at<double>(0,1) ) / s;
-                q1 = (a.at<double>(0,2) + a.at<double>(2,0) ) / s;
-                q2 = (a.at<double>(1,2) + a.at<double>(2,1)) / s;
-                q3 = 0.25 * s;
-            }
+            double s = 2.0 * sqrt( 1.0 + a.at<double>(2,2) - a.at<double>(0,0) - a.at<double>(1,1) );
+            q4 = (a.at<double>(1,0) - a.at<double>(0,1) ) / s;
+            q1 = (a.at<double>(0,2) + a.at<double>(2,0) ) / s;
+            q2 = (a.at<double>(1,2) + a.at<double>(2,1)) / s;
+            q3 = 0.25 * s;
         }
-
-        // Use Eigen for quaternion calculation -- same results
-
-        // Eigen::Matrix3f A_Eigen;
-        // cv::cv2eigen(a,A_Eigen);
-        // Eigen::Quaternionf Q(A_Eigen);
-        // Q.normalize();
-        // q1 = Q.coeffs()[0]; q2 = Q.coeffs()[1]; q3 = Q.coeffs()[2]; q4 = Q.coeffs()[3];
-
-        // -----------------------------------------------------------
     }
+
+    // Use Eigen for quaternion calculation -- same results
+
+    // Eigen::Matrix3f A_Eigen;
+    // cv::cv2eigen(a,A_Eigen);
+    // Eigen::Quaternionf Q(A_Eigen);
+    // Q.normalize();
+    // q1 = Q.coeffs()[0]; q2 = Q.coeffs()[1]; q3 = Q.coeffs()[2]; q4 = Q.coeffs()[3];
+
+    // -----------------------------------------------------------
+}
 
 
 }

@@ -19,12 +19,12 @@ std::string intrinsics_file[] = { "S01_INPUT/intrinsicsS01.xml", "S02_INPUT/intr
 std::string next_frame_fmt[] = { "S01_INPUT/S01L03_VGA/S01L03_VGA_%04d.png", "S02_INPUT/S02L03_VGA/S02L03_VGA_%04d.png", "S03_INPUT/S03L03_VGA/S03L03_VGA_%04d.png"};
 std::string template_file_fmt[] = {"S01_INPUT/S01L03_patch/S01L03_VGA_patch_%04d.png", "S02_INPUT/S02L03_patch/S02L03_VGA_patch_%04d.png", "S03_INPUT/S03L03_VGA_patch/S03L03_VGA_patch_%04d.png"};
 
-const double THR_BASELINE = baseline[SCENE-1];
-const std::string POINTS_2D_INIT_FILE = points2d_init_file[SCENE-1];
-const std::string POINTS_3D_INIT_FILE = points3d_init_file[SCENE-1];
-const std::string INTRINSICS_FILE = intrinsics_file[SCENE-1];
-const std::string NEXT_FRAME_FMT = next_frame_fmt[SCENE-1];
-const std::string TEMPL_FILE_FMT = template_file_fmt[SCENE-1];
+// const double THR_BASELINE = baseline[SCENE-1];
+// const std::string POINTS_2D_INIT_FILE = points2d_init_file[SCENE-1];
+// const std::string POINTS_3D_INIT_FILE = points3d_init_file[SCENE-1];
+// const std::string INTRINSICS_FILE = intrinsics_file[SCENE-1];
+// const std::string NEXT_FRAME_FMT = next_frame_fmt[SCENE-1];
+// const std::string TEMPL_FILE_FMT = template_file_fmt[SCENE-1];
 
 namespace visual_odometry {
 
@@ -46,6 +46,19 @@ bool STAM::init(cv::Mat image){
 
     return true;
 
+}
+
+bool STAM::init(cv::Mat image, std::string next_frame_fmt, std::string intrinsics_file, std::string points3d_init_file, std::string template_file_fmt, const double baseline)
+{
+    params.baseline_thr = baseline;
+    params.POINTS_3D_INIT_FILE = points3d_init_file;
+    params.INTRINSICS_FILE = intrinsics_file;
+    params.NEXT_FRAME_FMT = next_frame_fmt;
+    params.TEMPL_FILE_FMT = template_file_fmt;
+
+    loadIntrinsicsFromFile(params.INTRINSICS_FILE);
+
+    initFromTemplates(image,params.POINTS_3D_INIT_FILE, params.TEMPL_FILE_FMT);
 }
 
 
@@ -143,7 +156,7 @@ void STAM::initFromTemplates(cv::Mat image, const std::string& p3D_filename, con
     FILE *p3D_f = fopen(p3D_filename.c_str(), "r");
     int findex = 0;
     cv::Mat templ;  
-
+    // std::cout << image << std::endl;
     Frame::Ptr frame(new Frame(image));
     trackset_.image_ = image;
     cv::cvtColor(image, image, CV_BGR2GRAY);
@@ -168,6 +181,69 @@ void STAM::initFromTemplates(cv::Mat image, const std::string& p3D_filename, con
         cv::minMaxLoc(result,0,&maxv,0,&maxp);
         p2D.x = ((2*maxp.x)+templ.cols)/2;
         p2D.y = ((2*maxp.y)+templ.rows)/2;
+        // p3D *= 1000.00;
+        // std::cout << "2D : " << p2D.x << " " << p2D.y << std::endl;
+        // std::cout << "3D : " << p3D.x << " " << p3D.y << " " <<p3D.z << std::endl;
+
+        auto added_ids = memory_.addCorrespondence(frame->id_, p2D, p3D);
+        frame->keypoints.push_back( cv::KeyPoint(p2D.x, p2D.y, 1) );
+
+        frame->ids_.push_back( added_ids.first );
+
+        trackset_.points2D_.push_back( p2D );
+        trackset_.ids_.push_back( added_ids.first );
+    }
+
+    frame->detectAndDescribe();
+
+    frame->projMatrix = calcProjMatrix(false, frame->r, frame->t);
+    trackset_.projMatrix = frame->projMatrix;
+
+    key_frames_.push_back(frame);
+
+    // Not used
+    previous_frame_ = frame;
+
+    memory_.addKeyFrame(frame->id_, frame->r, frame->t, intrinsics_, distortion_(cv::Range(0,1),cv::Range(0,5)));
+
+    fclose(p3D_f);
+}
+
+void STAM::initFromTemplatesRandom(cv::Mat image, const std::string& p3D_filename, const std::string& template_format)
+{   // use template matching to find the 2D image coordinates of the given patches and match the corresponding 3D coordinates
+    cv::Point3f p3D;
+    cv::Point2f p2D;
+    FILE *p3D_f = fopen(p3D_filename.c_str(), "r");
+    int findex = 0;
+    cv::Mat templ;  
+    // std::cout << image << std::endl;
+    Frame::Ptr frame(new Frame(image));
+    trackset_.image_ = image;
+    cv::cvtColor(image, image, CV_BGR2GRAY);
+
+    while (fscanf(p3D_f, "%f,%f,%f", &p3D.x, &p3D.y, &p3D.z) == 3)
+    {
+        char buf[256];
+        sprintf(buf, template_format.c_str(), findex++);
+        templ = cv::imread(buf,0);
+
+        // ------Uncomment to reduce template size. may speed up the process
+
+        // resize(templ,templ,Size(templ.cols/1.5,templ.rows/1.5));
+
+        // -------------
+
+        cv::Mat result(image.rows - templ.rows + 1,image.cols - templ.cols + 1,CV_32FC1);
+
+        cv::matchTemplate(image,templ,result,CV_TM_CCOEFF_NORMED);
+
+        double maxv; cv::Point maxp;
+        cv::minMaxLoc(result,0,&maxv,0,&maxp);
+        p2D.x = ((2*maxp.x)+templ.cols)/2;
+        p2D.y = ((2*maxp.y)+templ.rows)/2;
+        p3D.x = p2D.x;
+        p3D.y = p2D.y;
+        p3D.z = 1000;
 
         auto added_ids = memory_.addCorrespondence(frame->id_, p2D, p3D);
         frame->keypoints.push_back( cv::KeyPoint(p2D.x, p2D.y, 1) );
@@ -459,7 +535,7 @@ void STAM::projectAndShow(cv::Mat projMatrix, cv::Mat image) {
     point3D.at<double>(1) = -264;
     point3D.at<double>(2) = 300;
     point3D.at<double>(3) = 1;
-    bool marker_flag = false;
+    bool marker_flag = true;
     cv::Mat result;
     result.create(cv::Size(1, 3), CV_64FC1);
     cv::gemm(intrinsics_*projMatrix, point3D, 1, 0, 0, result);

@@ -60,6 +60,8 @@ public:
 
     bool init(cv::Mat image);
 
+    bool init(cv::Mat image, std::string next_frame_fmt, std::string intrinsics_file, std::string points3d_init_file, std::string template_file_fmt, const double baseline=50);
+
     Frame::Ptr process(cv::Mat image, bool visualize_flag);
 
     void optimise();
@@ -78,6 +80,8 @@ private:
     void initFromFiles(cv::Mat image, const std::string& p2D_filename, const std::string& p3D_filename);
 
     void initFromTemplates(cv::Mat image, const std::string& p3D_filename, const std::string& template_format);
+
+    void initFromTemplatesRandom(cv::Mat image, const std::string& p3D_filename, const std::string& template_format);
 
     void updateUsingKLT(cv::Mat image);
 
