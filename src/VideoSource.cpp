@@ -10,6 +10,7 @@
 
 #include <VideoSource.h>
 #include <opencv2/highgui/highgui.hpp>
+#include <iostream>
 
 cv::Mat VideoSource::readNextFrame(const std::string& NEXT_FRAME_FMT) {
 
@@ -19,6 +20,7 @@ cv::Mat VideoSource::readNextFrame(const std::string& NEXT_FRAME_FMT) {
     char buf[256];
     sprintf(buf, NEXT_FRAME_FMT.c_str(), findex++);
     image = cv::imread(buf,-1);
+    std::cout << "index " << findex << std::endl;
 
     //if( findex >= 100 ) return cv::Mat();
 

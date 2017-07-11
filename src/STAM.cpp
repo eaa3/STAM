@@ -80,11 +80,29 @@ ProjectionCorrespondences STAM::getKeypointsInFrame(int key_frame_id)
         p2d_vec.push_back(p2d);
       // std::cout << p3d << std::endl << p2d << std::endl;
     }
-    // std::cout << p3d_vec << std::endl;
-    // std::cout << p2d_vec << std::endl;
+    // std::cout << p2d_vec.size() << "  3d" <<std::endl;
+    // std::cout << p3d_vec.size() << "  3d" << std::endl;
     return std::make_pair(p3d_vec,p2d_vec);  
 
     // std::cout << '\n';
+}
+
+std::vector<cv::Point3d> STAM::getCurrent3dPoints()
+{
+    std::vector<cv::Point3d> ret_val;
+    static int keypoint_counter = memory_.map_.begin()->first;
+    
+    for(auto it = memory_.map_.begin(); it != memory_.map_.end(); it++)
+    {
+        if (it->first == keypoint_counter)
+        {
+            ret_val.push_back(it->second);
+            keypoint_counter++;
+            std::cout << it -> second << std::endl;
+        }
+    }
+    return ret_val;
+
 }
 
 Frame::Ptr STAM::process(cv::Mat image, bool visualize_flag){
@@ -584,6 +602,7 @@ void STAM::projectAndShow(cv::Mat projMatrix, cv::Mat image) {
         point3D.at<double>(1) = it->second.y;
         point3D.at<double>(2) = it->second.z;
         point3D.at<double>(3) = 1;
+        // std::cout << point3D << std::endl;
 
         cv::Mat p3D;
         p3D.create(cv::Size(1, 4), CV_64FC1);
