@@ -18,7 +18,7 @@ bool visualize_flag;
 int main(int argc, char** argv){
 
     if( argc < 2 ){
-        printf(" usage: ./stam <scene_number>\n where <scene_number> = 1|2|3\n\n");
+        printf(" usage: ./stam <scene_number> \n where <scene_number> = 1|2|3\n\n");
         exit(1);
     }
     else{

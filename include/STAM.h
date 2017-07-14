@@ -66,7 +66,8 @@ public:
 
     ProjectionCorrespondences getKeypointsInFrame(int key_frame_id);
 
-    std::vector<cv::Point3d> getCurrent3dPoints();
+    std::vector<cv::Point3f> getCurrent3dPoints(){return curr3dPts_;}
+    std::vector<cv::Point2f> getCurrent2dKeyPoints(){return curr2dPts_;}
 
     void optimise();
     void dump();
@@ -102,6 +103,10 @@ private:
 
     TrackSet trackset_;
     Memory memory_;
+
+    
+    std::vector<cv::Point3f> curr3dPts_;
+    std::vector<cv::Point2f> curr2dPts_;
 
     vo_utils::GenericMatcher matcher;
 

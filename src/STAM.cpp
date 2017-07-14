@@ -87,23 +87,23 @@ ProjectionCorrespondences STAM::getKeypointsInFrame(int key_frame_id)
     // std::cout << '\n';
 }
 
-std::vector<cv::Point3d> STAM::getCurrent3dPoints()
-{
-    std::vector<cv::Point3d> ret_val;
-    static int keypoint_counter = memory_.map_.begin()->first;
+// std::vector<cv::Point3d> STAM::getCurrent3dPoints()
+// {
+//     std::vector<cv::Point3d> ret_val;
+//     static int keypoint_counter = memory_.map_.begin()->first;
     
-    for(auto it = memory_.map_.begin(); it != memory_.map_.end(); it++)
-    {
-        if (it->first == keypoint_counter)
-        {
-            ret_val.push_back(it->second);
-            keypoint_counter++;
-            std::cout << it -> second << std::endl;
-        }
-    }
-    return ret_val;
+//     for(auto it = memory_.map_.begin(); it != memory_.map_.end(); it++)
+//     {
+//         if (it->first == keypoint_counter)
+//         {
+//             ret_val.push_back(it->second);
+//             keypoint_counter++;
+//             // std::cout << it -> second << std::endl;
+//         }
+//     }
+//     return ret_val;
 
-}
+// }
 
 Frame::Ptr STAM::process(cv::Mat image, bool visualize_flag){
     if( image.empty() )
@@ -368,6 +368,8 @@ cv::Mat STAM::calcProjMatrix(bool use_guess, cv::Mat& guess_r, cv::Mat& guess_t)
     }
 
 
+    // std::cout << " vectors 2d : \n" << points3d << std::endl; 
+
     //        bool cv::solvePnPRansac   (   InputArray  objectPoints,
     //        InputArray    imagePoints,
     //        InputArray    cameraMatrix,
@@ -382,7 +384,8 @@ cv::Mat STAM::calcProjMatrix(bool use_guess, cv::Mat& guess_r, cv::Mat& guess_t)
     //        int   flags = SOLVEPNP_ITERATIVE
     //        )
 
-
+    curr3dPts_ = points3d;
+    curr2dPts_ = points2d;
     //LOG("Number of Points %d\n", points3d.size());
 
     cv::solvePnPRansac(points3d, points2d, intrinsics_, distortion_, guess_r, guess_t, use_guess, 100, 5.0, 0.99);
@@ -403,7 +406,7 @@ cv::Mat STAM::calcProjMatrix(bool use_guess, cv::Mat& guess_r, cv::Mat& guess_t)
 
 void STAM::updateUsingKLT(cv::Mat image) {
 
-
+    
     std::vector<cv::Point2f> currentPoints;
     std::vector<uchar> status;
     cv::Mat errors;
@@ -579,7 +582,7 @@ void STAM::projectAndShow(cv::Mat projMatrix, cv::Mat image) {
     point3D.at<double>(1) = -264;
     point3D.at<double>(2) = 300;
     point3D.at<double>(3) = 1;
-    bool marker_flag = true;
+    bool marker_flag = false;
     cv::Mat result;
     result.create(cv::Size(1, 3), CV_64FC1);
     cv::gemm(intrinsics_*projMatrix, point3D, 1, 0, 0, result);
