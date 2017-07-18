@@ -48,17 +48,20 @@ bool STAM::init(cv::Mat image){
 
 }
 
-bool STAM::init(cv::Mat image, std::string next_frame_fmt, std::string intrinsics_file, std::string points3d_init_file, std::string template_file_fmt, const double baseline)
+bool STAM::init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, std::string points3d_file, std::string template_file_format, const double base_line)
 {
-    params.baseline_thr = baseline;
-    params.POINTS_3D_INIT_FILE = points3d_init_file;
-    params.INTRINSICS_FILE = intrinsics_file;
-    params.NEXT_FRAME_FMT = next_frame_fmt;
-    params.TEMPL_FILE_FMT = template_file_fmt;
+    if (baseline[SCENE-1])
+        {params.baseline_thr = baseline[SCENE-1];}
+    else
+        {params.baseline_thr = base_line;}
+    params.POINTS_3D_INIT_FILE = points3d_file;
+    params.INTRINSICS_FILE = intrinsic_file;
+    params.NEXT_FRAME_FMT = nxtFrame;
+    params.TEMPL_FILE_FMT = template_file_format;
 
     loadIntrinsicsFromFile(params.INTRINSICS_FILE);
 
-    initFromTemplates(image,params.POINTS_3D_INIT_FILE, params.TEMPL_FILE_FMT);
+    initFromTemplates(img,params.POINTS_3D_INIT_FILE, params.TEMPL_FILE_FMT);
 }
 
 ProjectionCorrespondences STAM::getKeypointsInFrame(int key_frame_id)
@@ -87,23 +90,23 @@ ProjectionCorrespondences STAM::getKeypointsInFrame(int key_frame_id)
     // std::cout << '\n';
 }
 
-// std::vector<cv::Point3d> STAM::getCurrent3dPoints()
-// {
-//     std::vector<cv::Point3d> ret_val;
-//     static int keypoint_counter = memory_.map_.begin()->first;
+std::vector<cv::Point3f> STAM::getCurrent3dPoints2()
+{
+    std::vector<cv::Point3f> ret_val;
+    static int keypoint_counter = memory_.map_.begin()->first;
     
-//     for(auto it = memory_.map_.begin(); it != memory_.map_.end(); it++)
-//     {
-//         if (it->first == keypoint_counter)
-//         {
-//             ret_val.push_back(it->second);
-//             keypoint_counter++;
-//             // std::cout << it -> second << std::endl;
-//         }
-//     }
-//     return ret_val;
+    for(auto it = memory_.map_.begin(); it != memory_.map_.end(); it++)
+    {
+        if (it->first == keypoint_counter)
+        {
+            ret_val.push_back(it->second);
+            keypoint_counter++;
+            // std::cout << it -> second << std::endl;
+        }
+    }
+    return ret_val;
 
-// }
+}
 
 Frame::Ptr STAM::process(cv::Mat image, bool visualize_flag){
     if( image.empty() )

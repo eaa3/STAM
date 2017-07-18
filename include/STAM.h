@@ -67,6 +67,7 @@ public:
     ProjectionCorrespondences getKeypointsInFrame(int key_frame_id);
 
     std::vector<cv::Point3f> getCurrent3dPoints(){return curr3dPts_;}
+    std::vector<cv::Point3f> getCurrent3dPoints2();
     std::vector<cv::Point2f> getCurrent2dKeyPoints(){return curr2dPts_;}
 
     void optimise();
