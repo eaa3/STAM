@@ -50,14 +50,12 @@ bool STAM::init(cv::Mat image){
 
 bool STAM::init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, std::string points3d_file, std::string template_file_format, const double base_line)
 {
-    if (baseline[SCENE-1])
-        {params.baseline_thr = baseline[SCENE-1];}
-    else
-        {params.baseline_thr = base_line;}
+    params.baseline_thr = base_line;
     params.POINTS_3D_INIT_FILE = points3d_file;
     params.INTRINSICS_FILE = intrinsic_file;
     params.NEXT_FRAME_FMT = nxtFrame;
     params.TEMPL_FILE_FMT = template_file_format;
+    std::cout << "BaseLine Threshold: " << params.baseline_thr << std::endl;
 
     loadIntrinsicsFromFile(params.INTRINSICS_FILE);
 
