@@ -69,12 +69,12 @@ std::vector<cv::Point3f> find3DChessboardCorners(const std::string& p3D_filename
     // create a vector of 3d points of all inner corners row by row, left to right
     std::vector<cv::Point3f> ret_val;
     float dx_row, dy_row, dz_row, dx_col, dy_col, dz_col;
-    dx_row = (p2.x - p1.x)/points_per_row-1;
-    dy_row = (p2.y - p1.y)/points_per_row-1;
-    dz_row = (p2.z - p1.z)/points_per_row-1;
-    dx_col = (p3.x - p1.x)/points_per_col-1;
-    dy_col = (p3.y - p1.y)/points_per_col-1;
-    dz_col = (p3.z - p1.z)/points_per_col-1;
+    dx_row = (p2.x - p1.x)/(points_per_row-1);
+    dy_row = (p2.y - p1.y)/(points_per_row-1);
+    dz_row = (p2.z - p1.z)/(points_per_row-1);
+    dx_col = (p3.x - p1.x)/(points_per_col-1);
+    dy_col = (p3.y - p1.y)/(points_per_col-1);
+    dz_col = (p3.z - p1.z)/(points_per_col-1);
     cv::Point3f corner_point;
     for (int col_point = 0; col_point < points_per_col; ++col_point)
     {
