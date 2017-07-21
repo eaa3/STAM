@@ -46,6 +46,54 @@ cv::Mat convertToMat(const std::vector<cv::Mat>& descs_vector){
 
 }
 
+std::vector<cv::Point3f> find3DChessboardCorners(const std::string& p3D_filename, const int points_per_row, const int points_per_col)
+{
+
+    // Input: -- csv file containing world coordinates of 3 points: the first inner Chessboard corner (p1), the last inner corners along the row and coloumn (p2,p3),
+    //        -- number of points along the row,
+    //        -- number of points along the column.
+    //
+    // Output:-- Vector of 3D points in the required format for STAM initialisation (checkerboard initialisation).
+
+    // Get marker points from file
+    FILE *checkerboar_marker_file = fopen(p3D_filename.c_str(), "r");
+    cv::Point3f p3D, p1, p2, p3;
+    std::vector<cv::Point3f> marker_points;
+    while (fscanf(checkerboar_marker_file, "%f,%f,%f", &p3D.x, &p3D.y, &p3D.z) == 3)
+    {
+        marker_points.push_back(p3D);
+    }
+    assert(marker_points.size() == 4);
+    p1 = marker_points[0]; p2 = marker_points[1]; p3 = marker_points[2];
+
+    // create a vector of 3d points of all inner corners row by row, left to right
+    std::vector<cv::Point3f> ret_val;
+    float dx_row, dy_row, dz_row, dx_col, dy_col, dz_col;
+    dx_row = (p2.x - p1.x)/points_per_row-1;
+    dy_row = (p2.y - p1.y)/points_per_row-1;
+    dz_row = (p2.z - p1.z)/points_per_row-1;
+    dx_col = (p3.x - p1.x)/points_per_col-1;
+    dy_col = (p3.y - p1.y)/points_per_col-1;
+    dz_col = (p3.z - p1.z)/points_per_col-1;
+    cv::Point3f corner_point;
+    for (int col_point = 0; col_point < points_per_col; ++col_point)
+    {
+        for (int row_point = 0; row_point < points_per_row; ++row_point)
+        {
+            corner_point.x = p1.x + (col_point)*dx_col + (row_point)*dx_row;
+            corner_point.y = p1.y + (col_point)*dy_col + (row_point)*dy_row;
+            corner_point.z = p1.z + (col_point)*dz_col + (row_point)*dz_row;
+
+            ret_val.push_back(corner_point);
+        }
+    }
+
+    assert (cv::norm(ret_val[ret_val.size()-1]-marker_points[3]) < 20.00);
+
+    return ret_val;
+
+}
+
 // Generic Matcher
 
 

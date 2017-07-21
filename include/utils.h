@@ -27,6 +27,7 @@ namespace utils {
 void convertToStdVector(cv::Mat descriptors, std::vector<cv::Mat>& descs_vector_out);
 cv::Mat convertToMat(const std::vector<cv::Mat>& descs_vector);
 
+std::vector<cv::Point3f> find3DChessboardCorners(const std::string& p3D_filename, const int points_per_row, const int points_per_col);
 
 // Matcher goes here
 class GenericMatcher {
