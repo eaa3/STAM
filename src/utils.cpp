@@ -64,7 +64,7 @@ std::vector<cv::Point3f> find3DChessboardCorners(const std::string& p3D_filename
         marker_points.push_back(p3D);
     }
     assert(marker_points.size() == 4);
-    p1 = marker_points[0]; p2 = marker_points[1]; p3 = marker_points[2];
+    p1 = marker_points[3]; p2 = marker_points[2]; p3 = marker_points[1];
 
     // create a vector of 3d points of all inner corners row by row, left to right
     std::vector<cv::Point3f> ret_val;
@@ -87,8 +87,8 @@ std::vector<cv::Point3f> find3DChessboardCorners(const std::string& p3D_filename
             ret_val.push_back(corner_point);
         }
     }
-
-    assert (cv::norm(ret_val[ret_val.size()-1]-marker_points[3]) < 20.00);
+    // std::cout << marker_points << std::endl;
+    assert (cv::norm(ret_val[ret_val.size()-1]-marker_points[0]) < 20.00);
 
     return ret_val;
 

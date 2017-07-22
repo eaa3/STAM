@@ -22,7 +22,7 @@ cv::Mat VideoSource::readNextFrame(const std::string& NEXT_FRAME_FMT) {
     image = cv::imread(buf,-1);
     findex+=1;
     // std::cout << "index " << findex-1 << std::endl;
-
+    // std::cout << buf << std::endl;
     //if( findex >= 100 ) return cv::Mat();
 
     return image;

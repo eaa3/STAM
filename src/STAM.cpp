@@ -71,7 +71,7 @@ bool STAM::init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, s
     std::cout << "BaseLine Threshold: " << params.baseline_thr << std::endl;
 
     loadIntrinsicsFromFile(params.INTRINSICS_FILE);
-
+    // std::cout << "reaching here" << std::endl;
     initFromCheckerboard(img,params.POINTS_3D_INIT_FILE);
 }
 
@@ -83,15 +83,15 @@ void STAM::initFromCheckerboard(cv::Mat image, const std::string& p3D_filename)
     // std::cout << image << std::endl;
     Frame::Ptr frame(new Frame(image));
     trackset_.image_ = image;
+    // std::cout << " frame " << image << std::endl;
     cv::cvtColor(image, image, CV_BGR2GRAY);
-    // std::cout << " frame " << frame->id_ << std::endl;
-    int corners_per_row = 8;
+    int corners_per_row = 9;
     int corners_per_col = 6;
     cv::Size patternsize(corners_per_row,corners_per_col);
     bool patternfound = cv::findChessboardCorners(image, patternsize, p2D_vec, cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE+ cv::CALIB_CB_FAST_CHECK);
 
     if(patternfound)
-    {   std::cout << "found" << std::endl;
+    {   std::cout << "found checkerboard" << std::endl;
         cv::cornerSubPix(image, p2D_vec, cv::Size(5, 5), cv::Size(-1, -1), cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 100, 0.1));
     }
 
@@ -102,16 +102,15 @@ void STAM::initFromCheckerboard(cv::Mat image, const std::string& p3D_filename)
     assert(p2D_vec.size() == corners_per_row*corners_per_col && p2D_vec.size() == p3D_vec.size());
     for (int i = 0; i < p2D_vec.size(); ++i)
     {
-        std::cout << p2D_vec[i] << std::endl;
+        // std::cout << p2D_vec[i] << std::endl;
         // v.push_back(pt);
         // cv::drawKeypoints(frame, v, frame,-1,4);
-        cv::circle(image, p2D_vec[i],10,cv::Scalar(255,0,255),-1);
 
-
-        cv::imshow("window",image);
-        cv::waitKey(50);
-
-        // create algorithm to calculate p3D
+        // Visualize chessboard corners ----------------
+        // cv::circle(image, p2D_vec[i],10,cv::Scalar(255,0,255),-1);
+        // cv::imshow("window",image);
+        // cv::waitKey(50);
+        // ---------------------------------------------
 
         auto added_ids = memory_.addCorrespondence(frame->id_, p2D_vec[i], p3D_vec[i]);
         frame->keypoints.push_back( cv::KeyPoint(p2D_vec[i].x, p2D_vec[i].y, 1) );
@@ -121,7 +120,8 @@ void STAM::initFromCheckerboard(cv::Mat image, const std::string& p3D_filename)
         trackset_.points2D_.push_back( p2D_vec[i] );
         trackset_.ids_.push_back( added_ids.first );
     }
-
+    // std::cout << p2D_vec << std::endl;
+    // std::cout << p3D_vec << std::endl;
     frame->detectAndDescribe();
 
     frame->projMatrix = calcProjMatrix(false, frame->r, frame->t);
