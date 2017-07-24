@@ -94,7 +94,11 @@ void STAM::initFromCheckerboard(cv::Mat image, const std::string& p3D_filename)
     {   std::cout << "found checkerboard" << std::endl;
         cv::cornerSubPix(image, p2D_vec, cv::Size(5, 5), cv::Size(-1, -1), cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 100, 0.1));
     }
-
+    else 
+    {
+        std::cout << "ERROR! NO CHECKERBOARD FOUND TO INITIALISE STAM! \nABORTING VISUAL ODOMETRY " << std::endl;
+        exit(1);
+    }
     // Reading the checkerboard marker points from csv file
 
     std::vector<cv::Point3f> p3D_vec = utils::find3DChessboardCorners(p3D_filename, corners_per_row, corners_per_col);
@@ -441,8 +445,17 @@ cv::Mat STAM::calcProjMatrix(bool use_guess, cv::Mat& guess_r, cv::Mat& guess_t)
             points2d.push_back(trackset_.points2D_[i]);
         }
     }
+    curr3dPts_.clear();
+    curr2dPts_.clear();
+    for (int i = 0; i < trackset_.points2D_.size(); i++) {
 
+        if( trackset_.ids_[i] >= 0 ){
+            curr3dPts_.push_back(memory_.map_[trackset_.ids_[i]]);
+            curr2dPts_.push_back(trackset_.points2D_[i]);
+        }
+    }
 
+    std::cout << "STAM " << curr3dPts_.size() << std::endl;
     // std::cout << " vectors 2d : \n" << points3d << std::endl; 
 
     //        bool cv::solvePnPRansac   (   InputArray  objectPoints,
@@ -459,8 +472,8 @@ cv::Mat STAM::calcProjMatrix(bool use_guess, cv::Mat& guess_r, cv::Mat& guess_t)
     //        int   flags = SOLVEPNP_ITERATIVE
     //        )
 
-    curr3dPts_ = points3d;
-    curr2dPts_ = points2d;
+    // curr3dPts_ = points3d;
+    // curr2dPts_ = points2d;
     //LOG("Number of Points %d\n", points3d.size());
 
     cv::solvePnPRansac(points3d, points2d, intrinsics_, distortion_, guess_r, guess_t, use_guess, 100, 5.0, 0.99);
@@ -544,10 +557,7 @@ bool STAM::matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame,
 
     std::vector<bool> mask(current_frame->keypoints.size(), false);
 
-
-
-
-    LOG("NMatches %lu\n",matches.size());
+    // LOG("NMatches %lu\n",matches.size());
 
     if( !matches.size() )
         return false;

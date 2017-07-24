@@ -15,7 +15,7 @@
 cv::Mat VideoSource::readNextFrame(const std::string& NEXT_FRAME_FMT) {
 
 
-    static int findex = 0;
+    static int findex = 70;
     cv::Mat image;
     char buf[256];
     sprintf(buf, NEXT_FRAME_FMT.c_str(), findex);
