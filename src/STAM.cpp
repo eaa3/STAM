@@ -203,6 +203,17 @@ Frame::Ptr STAM::process(cv::Mat image, bool visualize_flag){
 
     current_frame->projMatrix = calcProjMatrix(false, current_frame->r, current_frame->t);
 
+    // // ++++++++++++++++++++++++++
+
+    // cv::Mat out;
+    // std::vector<cv::KeyPoint> key_points;
+    // cv::KeyPoint::convert(curr2dPts_, key_points);
+    // cv::drawKeypoints(image, key_points,out);
+    // cv::imshow("stam",out);
+    // cv::waitKey(1);
+
+    // // ==========================
+
     cv::Mat R1 = current_frame->projMatrix(cv::Range::all(), cv::Range(0, 3));
     cv::Mat T1 = current_frame->projMatrix(cv::Range::all(), cv::Range(3, 4));
 
@@ -455,7 +466,8 @@ cv::Mat STAM::calcProjMatrix(bool use_guess, cv::Mat& guess_r, cv::Mat& guess_t)
         }
     }
 
-    std::cout << "STAM " << curr3dPts_.size() << std::endl;
+    std::cout << "STAM Keypoints in current frame: " << curr3dPts_.size() << " " << curr2dPts_.size() << std::endl;
+
     // std::cout << " vectors 2d : \n" << points3d << std::endl; 
 
     //        bool cv::solvePnPRansac   (   InputArray  objectPoints,

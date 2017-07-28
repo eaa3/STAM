@@ -41,15 +41,16 @@ public:
     GenericMatcher() : ratio_(0.65f), refineF_(true),
         confidence_(0.99), distance_(1.0) {
         // SURF is the default feature
-        detector_ = new cv::StarFeatureDetector(32, 10, 18, 18, 20);//new cv::SurfFeatureDetector();
-        extractor_ = new cv::SURF(1000, 4, 2, false, true);//new cv::SurfDescriptorExtractor();
+        detector_ = new cv::StarFeatureDetector();//new cv::SurfFeatureDetector();
+        // detector_ = new cv::StarFeatureDetector(32, 10, 18, 18, 20);//new cv::SurfFeatureDetector();
+        extractor_ = new cv::SURF(1000, 4, 2, true, false);//new cv::SurfDescriptorExtractor();
     }
 
     GenericMatcher(float ratio, double confidence, double distance, bool refineF = true) : ratio_(ratio), refineF_(refineF),
         confidence_(confidence), distance_(distance) {
         // SURF is the default feature
         detector_ = new cv::StarFeatureDetector(32, 10, 18, 18, 20);//new cv::SurfFeatureDetector();
-        extractor_ = new cv::SURF(1000, 4, 2, false, true);//new cv::SurfDescriptorExtractor();
+        extractor_ = new cv::SURF(1000, 4, 2, true, false);//new cv::SurfDescriptorExtractor();
     }
 
 

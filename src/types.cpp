@@ -280,7 +280,9 @@ int Frame::next_id_s_ = 0;
 void Frame::detectAndDescribe() {
     char algorithm[] = "SIFT";
     cv::Ptr<cv::FeatureDetector> detector = cv::FeatureDetector::create(algorithm);
+    // cv::Ptr<cv::FeatureDetector> detector = new cv::DynamicAdaptedFeatureDetector(cv::AdjusterAdapter::create("SURF"), 200, 1000, 5);
     cv::Ptr<cv::DescriptorExtractor> descriptor = cv::DescriptorExtractor::create(algorithm);
+    // cv::Ptr<cv::DescriptorExtractor> descriptor = new cv::SurfDescriptorExtractor(1000, 4, 2, true, false);    
 
     std::vector<cv::KeyPoint> kpts;
     detector->detect(image, kpts);
