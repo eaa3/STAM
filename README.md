@@ -1,6 +1,7 @@
-# STAM (Visual Odometry for GraphSlam)
+# STAM (Modified for providing Visual Odometry in GraphSlam)
 Simple Tracking and Mapping - STAM
-This is the modified version of STAM implementation for providing visual odometry and pose estimations for Graph-Based SLAM
+
+This is the modified version of STAM implementation for providing visual odometry and pose estimations for Graph-Based SLAM.
 
 ### TODO ###
 
