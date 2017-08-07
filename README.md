@@ -1,5 +1,6 @@
-# STAM
+# STAM (Visual Odometry for GraphSlam)
 Simple Tracking and Mapping - STAM
+This is the modified version of STAM implementation for providing visual odometry and pose estimations for Graph-Based SLAM
 
 ### TODO ###
 
@@ -34,11 +35,11 @@ Simple Tracking and Mapping - STAM
 ### Building STAM Linux/OSX ###
 
 ````
-git clone https://github.com/eaa3/STAM.git
+git clone -b  https://github.com/eaa3/STAM.git
 
 cd STAM
    
-mkdir build 
+mkdir build && cd build
 
 cmake ..
 

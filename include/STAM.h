@@ -1,8 +1,9 @@
 /** @file STAM.h
- *
- * @author	Ermano A Arruda (eaa3@cin.ufpe.br)
- * @author	Joao Marcelo Teixeira (jmxnt@cin.ufpe.br)
- *
+ * (modified for Visual Odometry and Graph Slam by Saif Sidhik (sxs1412@student.bham.ac.uk))
+ * 
+ * @author  Ermano A Arruda (eaa3@cin.ufpe.br)
+ * @author  Joao Marcelo Teixeira (jmxnt@cin.ufpe.br)
+ * @author  Saif Sidhik (sxs1412@student.bham.ac.uk)
  * @version 1.0
  *
  */
@@ -69,9 +70,13 @@ public:
     ProjectionCorrespondences getKeypointsInFrame(int key_frame_id);
 
     std::vector<cv::Point3f> getCurrent3dPoints(){return curr3dPts_;}
-    std::vector<cv::Point3f> getCurrent3dPoints2();
+    std::vector<cv::Point3f> getNew3dPoints(); // only returns value if new world points are obtained (i.e. newly triangulated points)
     std::vector<cv::Point2f> getCurrent2dKeyPoints(){return curr2dPts_;}
 
+    cv::Mat getDistortion()
+    {
+        return distortion_;
+    }
     void optimise();
     void dump();
     std::list<Frame::Ptr> key_frames_;
@@ -102,6 +107,7 @@ private:
     void projectAndShow(cv::Mat projMatrix, cv::Mat image);
 
     void updateOptimisedKF();
+
 
     Frame::Ptr previous_frame_;
     //std::list<Frame::Ptr> key_frames_;

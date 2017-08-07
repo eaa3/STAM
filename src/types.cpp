@@ -1,8 +1,9 @@
 /** @file types.cpp
- *
- * @author	Ermano A Arruda (eaa3@cin.ufpe.br)
- * @author	Joao Marcelo Teixeira (jmxnt@cin.ufpe.br)
- *
+ * (modified for Visual Odometry and Graph Slam by Saif Sidhik (sxs1412@student.bham.ac.uk))
+ * 
+ * @author  Ermano A Arruda (eaa3@cin.ufpe.br)
+ * @author  Joao Marcelo Teixeira (jmxnt@cin.ufpe.br)
+ * @author  Saif Sidhik (sxs1412@student.bham.ac.uk)
  * @version 1.0
  *
  */

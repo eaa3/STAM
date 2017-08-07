@@ -1,11 +1,13 @@
 /** @file STAM.cpp
- *
- * @author	Ermano A Arruda (eaa3@cin.ufpe.br)
- * @author	Joao Marcelo Teixeira (jmxnt@cin.ufpe.br)
- *
+ * (modified for Visual Odometry and Graph Slam by Saif Sidhik (sxs1412@student.bham.ac.uk))
+ * 
+ * @author  Ermano A Arruda (eaa3@cin.ufpe.br)
+ * @author  Joao Marcelo Teixeira (jmxnt@cin.ufpe.br)
+ * @author  Saif Sidhik (sxs1412@student.bham.ac.uk)
  * @version 1.0
  *
  */
+
 #include <typeinfo>////
 #include "STAM.h"
 
@@ -166,7 +168,8 @@ ProjectionCorrespondences STAM::getKeypointsInFrame(int key_frame_id)
     // std::cout << '\n';
 }
 
-std::vector<cv::Point3f> STAM::getCurrent3dPoints2()
+// only returns value if new world points are obtained (i.e. newly triangulated points)
+std::vector<cv::Point3f> STAM::getNew3dPoints()
 {
     std::vector<cv::Point3f> ret_val;
     static int keypoint_counter = memory_.map_.begin()->first;
