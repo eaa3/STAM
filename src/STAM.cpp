@@ -142,32 +142,6 @@ void STAM::initFromCheckerboard(cv::Mat image, const std::string& p3D_filename)
 
 }
 
-ProjectionCorrespondences STAM::getKeypointsInFrame(int key_frame_id)
-{
-    std::pair <std::multimap<int, std::pair< int, int > >::iterator, std::multimap<int, std::pair< int, int > >::iterator> ret;
-    ret = memory_.projections_.equal_range(key_frame_id);
-    // std::cout << ret->first << std::endl;
-    // std::cout << "type" << typeid(memory_.projections_).name() << std::endl;
-    // std::cout << key_frame_id << " =>";
-    std::vector<cv::Point3d> p3d_vec;
-    std::vector<cv::Point2d> p2d_vec;
-    for (std::multimap<int, std::pair< int, int > >::iterator it=ret.first; it!=ret.second; ++it)
-    {
-        // std::cout << ' ' << it->first << ' ' << it->second.second << " " << it->second.second << std::endl;
-        int p3d_id = it->second.first; int p2d_id = it->second.second;
-        cv::Point3d p3d = memory_.map_.find(p3d_id)->second;
-        cv::Point2d p2d = memory_.points2D_.find(p2d_id)->second;
-        p3d_vec.push_back(p3d);
-        p2d_vec.push_back(p2d);
-      // std::cout << p3d << std::endl << p2d << std::endl;
-    }
-    // std::cout << p2d_vec.size() << "  3d" <<std::endl;
-    // std::cout << p3d_vec.size() << "  3d" << std::endl;
-    return std::make_pair(p3d_vec,p2d_vec);  
-
-    // std::cout << '\n';
-}
-
 // only returns value if new world points are obtained (i.e. newly triangulated points)
 std::vector<cv::Point3f> STAM::getNew3dPoints()
 {

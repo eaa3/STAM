@@ -67,8 +67,6 @@ public:
 
     Frame::Ptr process(cv::Mat image, bool visualize_flag);
 
-    ProjectionCorrespondences getKeypointsInFrame(int key_frame_id);
-
     std::vector<cv::Point3f> getCurrent3dPoints(){return curr3dPts_;}
     std::vector<cv::Point3f> getNew3dPoints(); // only returns value if new world points are obtained (i.e. newly triangulated points)
     std::vector<cv::Point2f> getCurrent2dKeyPoints(){return curr2dPts_;}
