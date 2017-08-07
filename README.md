@@ -35,7 +35,7 @@ This is the modified version of STAM implementation for providing visual odometr
 ### Building STAM Linux/OSX ###
 
 ````
-git clone -b  https://github.com/eaa3/STAM.git
+git clone -b graphslam_mod https://github.com/eaa3/STAM.git
 
 cd STAM
    

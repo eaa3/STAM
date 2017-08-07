@@ -76,11 +76,10 @@ int main(int argc, char** argv){
         std::cout << current_frame->pose.at<double>(0,3) << '\n' << current_frame->pose.at<double>(2,3) << std::endl;
         current_frame->getQuaternion(q1,q2,q3,q4);
         std::cout << q1 << " " << q2 << " " << q3 << " " << q4 << std::endl;
-        // std::cout << current_frame->r << std::endl;
-        // std::cout << current_frame->pose.at<double>(0,3) << std::endl;
+
 
     }
-
+    // bundle adjustment
     vOdom.optimise();
     vOdom.dump();
 

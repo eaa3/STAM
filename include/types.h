@@ -45,7 +45,6 @@ public:
     std::vector<int> ids_; // Points3D ids corresponding to each Point2D_
     cv::Mat projMatrix;
     cv::Mat image_;
-    // std::map<int, std::vector<cv::Point3d>> frame_kpts_; // keyframe id -> vector of 3d points observed
 };
 
 class Frame {
@@ -85,7 +84,6 @@ public:
     void detectAndDescribe();
     void getQuaternion(double& q1,double& q2,double& q3,double& q4);
     cv::Mat getCurrentPose();
-    // std::vector<cv::KeyPoint> getKeypoints();
 };
 
 class Memory {

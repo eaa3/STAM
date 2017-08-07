@@ -674,62 +674,51 @@ bool STAM::matchAndTriangulate(Frame::Ptr& key_frame, Frame::Ptr& current_frame,
     return true;
 }
 
-void STAM::projectAndShow(cv::Mat projMatrix, cv::Mat image) {
+void STAM::projectAndShow(cv::Mat projMatrix, cv::Mat image) 
+{
 
     cv::Mat point3D;
     point3D.create(cv::Size(1, 4), CV_64FC1);
-    point3D.at<double>(0) = 140;
-    point3D.at<double>(1) = -264;
-    point3D.at<double>(2) = 300;
-    point3D.at<double>(3) = 1;
-    bool marker_flag = false;
+
     cv::Mat result;
-    result.create(cv::Size(1, 3), CV_64FC1);
-    cv::gemm(intrinsics_*projMatrix, point3D, 1, 0, 0, result);
 
-    //printf("%lf %lf %lf\n", result.at<double>(0), result.at<double>(1), result.at<double>(2));
-    //printf("%lf %lf\n", result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2));
+    bool marker_flag = false; // if true, the keypoints will be visualised in the frames
+
     cv::Mat imcopy = image.clone();
-    if (marker_flag){
-    cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)),4,cv::Scalar(0,0,255),-1);
-    cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)), 3, cv::Scalar(255, 255, 255), -1);
-    cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)), 2, cv::Scalar(0, 0, 255), -1);
+    if (marker_flag)
+    {
 
+        for(auto it = memory_.map_.begin(); it != memory_.map_.end(); it++)
+        {
 
+            point3D.at<double>(0) = it->second.x;
+            point3D.at<double>(1) = it->second.y;
+            point3D.at<double>(2) = it->second.z;
+            point3D.at<double>(3) = 1;
+            // std::cout << point3D << std::endl;
 
-    //std::max<int>(0,(squareFeatures.size()-40))
+            cv::Mat p3D;
+            p3D.create(cv::Size(1, 4), CV_64FC1);
+            p3D.at<double>(0) = it->second.x;
+            p3D.at<double>(1) = it->second.y;
+            p3D.at<double>(2) = it->second.z;
+            p3D.at<double>(2) = 1;
+            cv::Mat p3DCam = (projMatrix)*p3D;
 
-    for(auto it = memory_.map_.begin(); it != memory_.map_.end(); it++){
+            float r = 40.0/(abs(p3D.at<double>(1))+1);
+            int ri = 255*r;
+            cv::gemm(intrinsics_*projMatrix,  point3D , 1, 0, 0, result);
+            cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)),4,cv::Scalar(ri,0,255),-1);
+            cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)), 3, cv::Scalar(ri, 255, 255), -1);
+            cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)), 2, cv::Scalar(ri, 0, 255), -1);
 
-        point3D.at<double>(0) = it->second.x;
-        point3D.at<double>(1) = it->second.y;
-        point3D.at<double>(2) = it->second.z;
-        point3D.at<double>(3) = 1;
-        // std::cout << point3D << std::endl;
-
-        cv::Mat p3D;
-        p3D.create(cv::Size(1, 4), CV_64FC1);
-        p3D.at<double>(0) = it->second.x;
-        p3D.at<double>(1) = it->second.y;
-        p3D.at<double>(2) = it->second.z;
-        p3D.at<double>(2) = 1;
-        cv::Mat p3DCam = (projMatrix)*p3D;
-
-        float r = 40.0/(abs(p3D.at<double>(1))+1);
-        int ri = 255*r;
-        cv::gemm(intrinsics_*projMatrix,  point3D , 1, 0, 0, result);
-        cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)),4,cv::Scalar(ri,0,255),-1);
-        cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)), 3, cv::Scalar(ri, 255, 255), -1);
-        cv::circle(imcopy, cv::Point(result.at<double>(0) / result.at<double>(2), result.at<double>(1) / result.at<double>(2)), 2, cv::Scalar(ri, 0, 255), -1);
-
-
+        }
 
     }
 
-}
-
     cv::imshow("frame", imcopy);
-    if (cv::waitKey(1) == 27) {
+    if (cv::waitKey(1) == 27) 
+    {
         exit(0);
     }
 
