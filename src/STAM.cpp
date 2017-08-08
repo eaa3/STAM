@@ -82,6 +82,7 @@ void STAM::initFromCheckerboard(cv::Mat image, const std::string& p3D_filename)
     cv::Point3f p3D;  //
     cv::Point2f p2D;  //
     std::vector<cv::Point2f> p2D_vec; // storing detected chessboard corners
+    bool invert_checkerboard = false;
     // std::cout << image << std::endl;
     Frame::Ptr frame(new Frame(image));
     trackset_.image_ = image;
@@ -103,20 +104,21 @@ void STAM::initFromCheckerboard(cv::Mat image, const std::string& p3D_filename)
     }
     // Reading the checkerboard marker points from csv file
 
-    std::vector<cv::Point3f> p3D_vec = utils::find3DChessboardCorners(p3D_filename, corners_per_row, corners_per_col);
+    if ((p2D_vec[0].x- p2D_vec[p2D_vec.size()-1].x > 0.0) && (p2D_vec[0].y - p2D_vec[p2D_vec.size()-1].y > 0 ))
+        invert_checkerboard = true;
+
+    std::vector<cv::Point3f> p3D_vec = utils::find3DChessboardCorners(p3D_filename, corners_per_row, corners_per_col, invert_checkerboard);
 
     assert(p2D_vec.size() == corners_per_row*corners_per_col && p2D_vec.size() == p3D_vec.size());
     for (int i = 0; i < p2D_vec.size(); ++i)
     {
         // std::cout << p2D_vec[i] << std::endl;
-        // v.push_back(pt);
-        // cv::drawKeypoints(frame, v, frame,-1,4);
 
-        // Visualize chessboard corners ----------------
+        //// ----- Visualize chessboard corners ----------------
         // cv::circle(image, p2D_vec[i],10,cv::Scalar(255,0,255),-1);
         // cv::imshow("window",image);
         // cv::waitKey(50);
-        // ---------------------------------------------
+        //// ---------------------------------------------
 
         auto added_ids = memory_.addCorrespondence(frame->id_, p2D_vec[i], p3D_vec[i]);
         frame->keypoints.push_back( cv::KeyPoint(p2D_vec[i].x, p2D_vec[i].y, 1) );
@@ -126,6 +128,7 @@ void STAM::initFromCheckerboard(cv::Mat image, const std::string& p3D_filename)
         trackset_.points2D_.push_back( p2D_vec[i] );
         trackset_.ids_.push_back( added_ids.first );
     }
+    // cv::waitKey(0);
     // std::cout << p2D_vec << std::endl;
     // std::cout << p3D_vec << std::endl;
     frame->detectAndDescribe();

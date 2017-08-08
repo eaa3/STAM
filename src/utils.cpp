@@ -47,7 +47,7 @@ cv::Mat convertToMat(const std::vector<cv::Mat>& descs_vector){
 
 }
 
-std::vector<cv::Point3f> find3DChessboardCorners(const std::string& p3D_filename, const int points_per_row, const int points_per_col)
+std::vector<cv::Point3f> find3DChessboardCorners(const std::string& p3D_filename, const int points_per_row, const int points_per_col, bool invert_flag)
 {
 
     // Input: -- csv file containing world coordinates of 3 points: the first inner Chessboard corner (p1), the last inner corners along the row and coloumn (p2,p3),
@@ -58,14 +58,32 @@ std::vector<cv::Point3f> find3DChessboardCorners(const std::string& p3D_filename
 
     // Get marker points from file
     FILE *checkerboar_marker_file = fopen(p3D_filename.c_str(), "r");
-    cv::Point3f p3D, p1, p2, p3;
+    cv::Point3f p3D, p1, p2, p3,p4, p1_temp, p2_temp, p3_temp, p4_temp;
     std::vector<cv::Point3f> marker_points;
     while (fscanf(checkerboar_marker_file, "%f,%f,%f", &p3D.x, &p3D.y, &p3D.z) == 3)
     {
         marker_points.push_back(p3D);
     }
     assert(marker_points.size() == 4);
-    p1 = marker_points[3]; p2 = marker_points[2]; p3 = marker_points[1];
+    p1_temp = marker_points[3]; p2_temp = marker_points[2]; p3_temp = marker_points[1]; p4_temp = marker_points[0];
+
+    // std::cout << "status: " << (cv::norm(p1_temp + (p2_temp-p1_temp) + (p3_temp-p1_temp) - p4_temp) < 10.00) << std::endl;
+
+    // std::cout << p1 + p2 << std::endl;
+    // std::cout << marker_points[0];
+
+    // -------- Checking if the corners were detected from top-left to bottom-right or bottom-right to top-left
+    if (invert_flag)
+    {
+        std::cout << "Detected corners from bottom-right to top-left." << std::endl;
+        p1 = p1_temp; p2 = p2_temp; p3 = p3_temp; p4 = p4_temp;
+    }
+    else
+    {
+        std::cout << "Detected corners from top-left to bottom-right." << std::endl;
+        p1 = p4_temp; p2 = p3_temp; p3 = p2_temp; p4 = p1_temp; 
+    }
+
 
     // create a vector of 3d points of all inner corners row by row, left to right
     std::vector<cv::Point3f> ret_val;
@@ -88,8 +106,11 @@ std::vector<cv::Point3f> find3DChessboardCorners(const std::string& p3D_filename
             ret_val.push_back(corner_point);
         }
     }
+    // std::cout << ret_val << std::endl;
+    // std::cout << p4 << std::endl;
     // std::cout << marker_points << std::endl;
-    assert (cv::norm(ret_val[ret_val.size()-1]-marker_points[0]) < 20.00);
+    std::cout << "Checkerboard 3D corner estimation error: " << float(cv::norm(ret_val[ret_val.size()-1]-p4)) << std::endl;
+    assert (cv::norm(ret_val[ret_val.size()-1]-p4) < 40.00);
 
     return ret_val;
 
