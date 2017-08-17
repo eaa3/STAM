@@ -30,7 +30,7 @@ std::string template_file_fmt[] = {"S01_INPUT/S01L03_patch/S01L03_VGA_patch_%04d
 
 namespace visual_odometry {
 
-
+STAM::STAM(bool marker_flag):marker_flag_(marker_flag){}
 
 bool STAM::init(cv::Mat image){
 
@@ -659,7 +659,7 @@ void STAM::projectAndShow(cv::Mat projMatrix, cv::Mat image)
 
     cv::Mat result;
 
-    bool marker_flag = false; // if true, the keypoints will be visualised in the frames
+    bool marker_flag = marker_flag_; // if true, the keypoints will be visualised in the frames
 
     cv::Mat imcopy = image.clone();
     if (marker_flag)

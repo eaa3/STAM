@@ -57,7 +57,7 @@ public:
     };
 
 
-    STAM()  {}
+    STAM(bool marker_flag = true);
 
     bool init(cv::Mat image);
 
@@ -69,6 +69,7 @@ public:
 
     std::vector<cv::Point3f> getCurrent3dPoints(){return curr3dPts_;}
     std::vector<cv::Point3f> getNew3dPoints(); // only returns value if new world points are obtained (i.e. newly triangulated points)
+    std::vector<cv::Point2f> getNew2dPoints(){return trackset_.points2D_;} 
     std::vector<cv::Point2f> getCurrent2dKeyPoints(){return curr2dPts_;}
 
     cv::Mat getDistortion()
@@ -123,7 +124,7 @@ private:
 
     Params params;
 
-
+    bool marker_flag_;
 
 };
 
