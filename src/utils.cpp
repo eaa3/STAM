@@ -47,7 +47,7 @@ cv::Mat convertToMat(const std::vector<cv::Mat>& descs_vector){
 
 }
 
-std::vector<cv::Point3f> find3DChessboardCorners(const std::string& p3D_filename, const int points_per_row, const int points_per_col, bool invert_flag)
+std::vector<cv::Point3f> find3DCheckerboardCorners(const std::string& p3D_filename, const int points_per_row, const int points_per_col, bool invert_flag)
 {
 
     // Input: -- csv file containing world coordinates of 3 points: the first inner Chessboard corner (p1), the last inner corners along the row and coloumn (p2,p3),
@@ -58,19 +58,42 @@ std::vector<cv::Point3f> find3DChessboardCorners(const std::string& p3D_filename
 
     // Get marker points from file
     FILE *checkerboar_marker_file = fopen(p3D_filename.c_str(), "r");
-    cv::Point3f p3D, p1, p2, p3,p4, p1_temp, p2_temp, p3_temp, p4_temp;
+    cv::Point3f p3D;
     std::vector<cv::Point3f> marker_points;
     while (fscanf(checkerboar_marker_file, "%f,%f,%f", &p3D.x, &p3D.y, &p3D.z) == 3)
     {
         marker_points.push_back(p3D);
     }
+
+    std::vector<cv::Point3f> ret_val = find3DCheckerboardCorners(marker_points, points_per_row, points_per_col, invert_flag);
+
+    return ret_val;
+
+}
+
+std::vector<cv::Point3f> find3DCheckerboardCorners(const int points_per_row, const int points_per_col, bool invert_flag)
+{
+
+    cv::Point3f p1, p2, p3, p4;
+    std::vector<cv::Point3f> marker_points;
+    p1.x = 0.0; p1.y = checkerboard_scale_*points_per_col; p1.z = 0.0; marker_points.push_back(p1);
+    p2.x = checkerboard_scale_*points_per_row; p2.y = checkerboard_scale_*points_per_col; p2.z = 0.0; marker_points.push_back(p2);
+    p3.x = 0.0; p3.y = 0.0; p3.z =0.0; marker_points.push_back(p3);
+    p4.x = checkerboard_scale_*points_per_row; p4.y = 0.0; p4.z = 0.0; marker_points.push_back(p4);
+
+
+    std::vector<cv::Point3f> ret_val = find3DCheckerboardCorners(marker_points, points_per_row, points_per_col, invert_flag);
+
+    return ret_val;
+
+}
+
+std::vector<cv::Point3f> find3DCheckerboardCorners(std::vector<cv::Point3f> marker_points, const int points_per_row, const int points_per_col, bool invert_flag)
+{
+
     assert(marker_points.size() == 4);
+    cv::Point3f p1, p2, p3,p4, p1_temp, p2_temp, p3_temp, p4_temp;
     p1_temp = marker_points[3]; p2_temp = marker_points[2]; p3_temp = marker_points[1]; p4_temp = marker_points[0];
-
-    // std::cout << "status: " << (cv::norm(p1_temp + (p2_temp-p1_temp) + (p3_temp-p1_temp) - p4_temp) < 10.00) << std::endl;
-
-    // std::cout << p1 + p2 << std::endl;
-    // std::cout << marker_points[0];
 
     // -------- Checking if the corners were detected from top-left to bottom-right or bottom-right to top-left
     if (invert_flag)

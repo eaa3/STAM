@@ -63,7 +63,9 @@ public:
 
     bool init(cv::Mat image, std::string next_frame_fmt, std::string intrinsics_file, std::string points3d_init_file, std::string template_file_fmt, const double baseline=50);
 
-    bool init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, std::string points3d_file, const double baseline=50);
+    bool init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, std::string points3d_file, int corners_per_row, int corners_per_col, const double baseline=50);
+
+    bool init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, int corners_per_row, int corners_per_col, const double baseline=50);
 
     Frame::Ptr process(cv::Mat image, bool visualize_flag);
 
@@ -91,7 +93,9 @@ private:
 
     void initFromFiles(cv::Mat image, const std::string& p2D_filename, const std::string& p3D_filename);
 
-    void initFromCheckerboard(cv::Mat image, const std::string& p3D_filename);
+    void initFromCheckerboard(cv::Mat image, int corners_per_row, int corners_per_col, const std::string& p3D_filename);
+
+    void initFromCheckerboardDefaultOrigin(cv::Mat image, int corners_per_row, int corners_per_col);
 
     void initFromTemplates(cv::Mat image, const std::string& p3D_filename, const std::string& template_format);
 

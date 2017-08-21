@@ -64,7 +64,7 @@ bool STAM::init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, s
     initFromTemplates(img,params.POINTS_3D_INIT_FILE, params.TEMPL_FILE_FMT);
 }
 
-bool STAM::init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, std::string points3d_file, const double base_line)
+bool STAM::init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, std::string points3d_file, int corners_per_row, int corners_per_col, const double base_line)
 {
     params.baseline_thr = base_line;
     params.POINTS_3D_INIT_FILE = points3d_file;
@@ -74,10 +74,22 @@ bool STAM::init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, s
 
     loadIntrinsicsFromFile(params.INTRINSICS_FILE);
     // std::cout << "reaching here" << std::endl;
-    initFromCheckerboard(img,params.POINTS_3D_INIT_FILE);
+    initFromCheckerboard(img, corners_per_row, corners_per_col, params.POINTS_3D_INIT_FILE);
 }
 
-void STAM::initFromCheckerboard(cv::Mat image, const std::string& p3D_filename)
+bool STAM::init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, int corners_per_row, int corners_per_col, const double base_line)
+{
+    params.baseline_thr = base_line;
+    params.INTRINSICS_FILE = intrinsic_file;
+    params.NEXT_FRAME_FMT = nxtFrame;
+    std::cout << "BaseLine Threshold: " << params.baseline_thr << std::endl;
+
+    loadIntrinsicsFromFile(params.INTRINSICS_FILE);
+    // std::cout << "reaching here" << std::endl;
+    initFromCheckerboardDefaultOrigin(img, corners_per_row, corners_per_col);
+}
+
+void STAM::initFromCheckerboard(cv::Mat image, int corners_per_row, int corners_per_col, const std::string& p3D_filename)
 {
     cv::Point3f p3D;  //
     cv::Point2f p2D;  //
@@ -88,8 +100,6 @@ void STAM::initFromCheckerboard(cv::Mat image, const std::string& p3D_filename)
     trackset_.image_ = image;
     // std::cout << " frame " << image << std::endl;
     cv::cvtColor(image, image, CV_BGR2GRAY);
-    int corners_per_row = 9;
-    int corners_per_col = 6;
     cv::Size patternsize(corners_per_row,corners_per_col);
     bool patternfound = cv::findChessboardCorners(image, patternsize, p2D_vec, cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE+ cv::CALIB_CB_FAST_CHECK);
 
@@ -99,7 +109,7 @@ void STAM::initFromCheckerboard(cv::Mat image, const std::string& p3D_filename)
     }
     else 
     {
-        std::cout << "ERROR! NO CHECKERBOARD FOUND TO INITIALISE STAM! \nABORTING VISUAL ODOMETRY " << std::endl;
+        std::cout << "ERROR! NO CHECKERBOARD FOUND TO INITIALISE STAM! VERIFY CORNERS PER ROW AND COLUMN.\nABORTING VISUAL ODOMETRY " << std::endl;
         exit(1);
     }
     // Reading the checkerboard marker points from csv file
@@ -107,7 +117,73 @@ void STAM::initFromCheckerboard(cv::Mat image, const std::string& p3D_filename)
     if ((p2D_vec[0].x- p2D_vec[p2D_vec.size()-1].x > 0.0) && (p2D_vec[0].y - p2D_vec[p2D_vec.size()-1].y > 0 ))
         invert_checkerboard = true;
 
-    std::vector<cv::Point3f> p3D_vec = utils::find3DChessboardCorners(p3D_filename, corners_per_row, corners_per_col, invert_checkerboard);
+    std::vector<cv::Point3f> p3D_vec = utils::find3DCheckerboardCorners(p3D_filename, corners_per_row, corners_per_col, invert_checkerboard);
+
+    assert(p2D_vec.size() == corners_per_row*corners_per_col && p2D_vec.size() == p3D_vec.size());
+    for (int i = 0; i < p2D_vec.size(); ++i)
+    {
+        // std::cout << p2D_vec[i] << std::endl;
+
+        //// ----- Visualize chessboard corners ----------------
+        // cv::circle(image, p2D_vec[i],10,cv::Scalar(255,0,255),-1);
+        // cv::imshow("window",image);
+        // cv::waitKey(50);
+        //// ---------------------------------------------
+
+        auto added_ids = memory_.addCorrespondence(frame->id_, p2D_vec[i], p3D_vec[i]);
+        frame->keypoints.push_back( cv::KeyPoint(p2D_vec[i].x, p2D_vec[i].y, 1) );
+
+        frame->ids_.push_back( added_ids.first );
+
+        trackset_.points2D_.push_back( p2D_vec[i] );
+        trackset_.ids_.push_back( added_ids.first );
+    }
+    // cv::waitKey(0);
+    // std::cout << p2D_vec << std::endl;
+    // std::cout << p3D_vec << std::endl;
+    frame->detectAndDescribe();
+
+    frame->projMatrix = calcProjMatrix(false, frame->r, frame->t);
+    trackset_.projMatrix = frame->projMatrix;
+
+    key_frames_.push_back(frame);
+
+    // Not used
+    previous_frame_ = frame;
+
+    memory_.addKeyFrame(frame->id_, frame->r, frame->t, intrinsics_, distortion_(cv::Range(0,1),cv::Range(0,5)));
+
+}
+
+void STAM::initFromCheckerboardDefaultOrigin(cv::Mat image, int corners_per_row, int corners_per_col)
+{
+    cv::Point3f p3D;  //
+    cv::Point2f p2D;  //
+    std::vector<cv::Point2f> p2D_vec; // storing detected chessboard corners
+    bool invert_checkerboard = false;
+    // std::cout << image << std::endl;
+    Frame::Ptr frame(new Frame(image));
+    trackset_.image_ = image;
+    // std::cout << " frame " << image << std::endl;
+    cv::cvtColor(image, image, CV_BGR2GRAY);
+    cv::Size patternsize(corners_per_row,corners_per_col);
+    bool patternfound = cv::findChessboardCorners(image, patternsize, p2D_vec, cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE+ cv::CALIB_CB_FAST_CHECK);
+
+    if(patternfound)
+    {   std::cout << "found checkerboard" << std::endl;
+        cv::cornerSubPix(image, p2D_vec, cv::Size(5, 5), cv::Size(-1, -1), cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 100, 0.1));
+    }
+    else 
+    {
+        std::cout << "ERROR! NO CHECKERBOARD FOUND TO INITIALISE STAM! VERIFY CORNERS PER ROW AND COLUMN.\nABORTING VISUAL ODOMETRY " << std::endl;
+        exit(1);
+    }
+    // Reading the checkerboard marker points from csv file
+
+    if ((p2D_vec[0].x- p2D_vec[p2D_vec.size()-1].x > 0.0) && (p2D_vec[0].y - p2D_vec[p2D_vec.size()-1].y > 0 ))
+        invert_checkerboard = true;
+
+    std::vector<cv::Point3f> p3D_vec = utils::find3DCheckerboardCorners(corners_per_row, corners_per_col, invert_checkerboard);
 
     assert(p2D_vec.size() == corners_per_row*corners_per_col && p2D_vec.size() == p3D_vec.size());
     for (int i = 0; i < p2D_vec.size(); ++i)
