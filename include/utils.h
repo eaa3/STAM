@@ -32,7 +32,7 @@ std::vector<cv::Point3f> find3DCheckerboardCorners(const std::string& p3D_filena
 std::vector<cv::Point3f> find3DCheckerboardCorners(const int points_per_row, const int points_per_col, bool invert_flag = false);
 std::vector<cv::Point3f> find3DCheckerboardCorners(std::vector<cv::Point3f> marker_points, const int points_per_row, const int points_per_col, bool invert_flag);
 
-const float checkerboard_scale_ = 30.0;
+const float checkerboard_scale_ = 30.0; // default size of one side of the checkerboard while using default checkerboard origin coordinate frame
 
 // Matcher goes here
 class GenericMatcher {
@@ -41,8 +41,6 @@ public:
 
     typedef std::vector<cv::DMatch> MatchSeq;
 
-    // for S01:  ratio_(0.45f), refineF_(true),
-    // confidence_(0.99), distance_(2.0)
     GenericMatcher() : ratio_(0.65f), refineF_(true),
         confidence_(0.99), distance_(1.0) {
         // SURF is the default feature
@@ -70,13 +68,6 @@ public:
             cv::Ptr<cv::DescriptorExtractor>& desc) {
         extractor_ = desc;
     }
-
-
-
-    //void match(DataSpot3D::DataSpot3DPtr spot_src, DataSpot3D::DataSpot3DPtr spot_target, std::vector<cv::DMatch>& matches);
-
-
-
 
     // Match feature points using symmetry test and RANSAC
     // returns fundemental matrix

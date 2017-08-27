@@ -26,8 +26,6 @@ void convertToStdVector(cv::Mat descriptors, std::vector<cv::Mat>& descs_vector_
 }
 
 cv::Mat convertToMat(const std::vector<cv::Mat>& descs_vector){
-    //if( descs_vector.size() == 0 )
-    //    return;
 
     if( descs_vector.size() == 0 ){
         printf("WARNING!!!\n");
@@ -50,7 +48,7 @@ cv::Mat convertToMat(const std::vector<cv::Mat>& descs_vector){
 std::vector<cv::Point3f> find3DCheckerboardCorners(const std::string& p3D_filename, const int points_per_row, const int points_per_col, bool invert_flag)
 {
 
-    // Input: -- csv file containing world coordinates of 3 points: the first inner Chessboard corner (p1), the last inner corners along the row and coloumn (p2,p3),
+    // Input: -- csv file containing world coordinates of 4 points: the first inner Chessboard corner (top-left) (p1), the last inner corners along the row and coloumn (p2,p3), bottom right inner corner (p4)
     //        -- number of points along the row,
     //        -- number of points along the column.
     //
@@ -73,7 +71,12 @@ std::vector<cv::Point3f> find3DCheckerboardCorners(const std::string& p3D_filena
 
 std::vector<cv::Point3f> find3DCheckerboardCorners(const int points_per_row, const int points_per_col, bool invert_flag)
 {
-
+    // Input: 
+    //        -- number of points along the row,
+    //        -- number of points along the column.
+    //
+    // Output:-- Vector of 3D points in the required format for STAM initialisation (checkerboard initialisation) with the bottom right corner as origin
+    // checkerboard_scale_ defines the scale of the new coordinate system. Value defines the length of one side of a square in the checkerboard.
     cv::Point3f p1, p2, p3, p4;
     std::vector<cv::Point3f> marker_points;
     p1.x = 0.0; p1.y = checkerboard_scale_*points_per_col; p1.z = 0.0; marker_points.push_back(p1);
@@ -129,9 +132,6 @@ std::vector<cv::Point3f> find3DCheckerboardCorners(std::vector<cv::Point3f> mark
             ret_val.push_back(corner_point);
         }
     }
-    // std::cout << ret_val << std::endl;
-    // std::cout << p4 << std::endl;
-    // std::cout << marker_points << std::endl;
     std::cout << "Checkerboard 3D corner estimation error: " << float(cv::norm(ret_val[ret_val.size()-1]-p4)) << std::endl;
     assert (cv::norm(ret_val[ret_val.size()-1]-p4) < 40.00);
 

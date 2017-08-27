@@ -95,6 +95,7 @@ private:
 
     void initFromCheckerboard(cv::Mat image, int corners_per_row, int corners_per_col, const std::string& p3D_filename);
 
+    // ----- does not require the 3d positions of the checkerboard corners. Uses the bottom left corner as the default origin
     void initFromCheckerboardDefaultOrigin(cv::Mat image, int corners_per_row, int corners_per_col);
 
     void initFromTemplates(cv::Mat image, const std::string& p3D_filename, const std::string& template_format);

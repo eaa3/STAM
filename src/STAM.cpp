@@ -32,6 +32,8 @@ namespace visual_odometry {
 
 STAM::STAM(bool marker_flag):marker_flag_(marker_flag){}
 
+
+// ----- use only for stam dataset hardcoded to the locations above
 bool STAM::init(cv::Mat image){
 
     params.baseline_thr = baseline[SCENE-1];
@@ -50,6 +52,7 @@ bool STAM::init(cv::Mat image){
 
 }
 
+// ----- init with templates. finds the positions of the templates in the initial image. requires p3d of the template points. baselline adjustable.
 bool STAM::init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, std::string points3d_file, std::string template_file_format, const double base_line)
 {
     params.baseline_thr = base_line;
@@ -64,6 +67,7 @@ bool STAM::init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, s
     initFromTemplates(img,params.POINTS_3D_INIT_FILE, params.TEMPL_FILE_FMT);
 }
 
+// ----- init with checkerboard with known coordiates (of 4 corners)
 bool STAM::init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, std::string points3d_file, int corners_per_row, int corners_per_col, const double base_line)
 {
     params.baseline_thr = base_line;
@@ -73,10 +77,10 @@ bool STAM::init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, s
     std::cout << "BaseLine Threshold: " << params.baseline_thr << std::endl;
 
     loadIntrinsicsFromFile(params.INTRINSICS_FILE);
-    // std::cout << "reaching here" << std::endl;
     initFromCheckerboard(img, corners_per_row, corners_per_col, params.POINTS_3D_INIT_FILE);
 }
 
+// ----- init with checkerboard with unknown coordinates
 bool STAM::init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, int corners_per_row, int corners_per_col, const double base_line)
 {
     params.baseline_thr = base_line;
@@ -85,10 +89,10 @@ bool STAM::init(cv::Mat img, std::string nxtFrame, std::string intrinsic_file, i
     std::cout << "BaseLine Threshold: " << params.baseline_thr << std::endl;
 
     loadIntrinsicsFromFile(params.INTRINSICS_FILE);
-    // std::cout << "reaching here" << std::endl;
     initFromCheckerboardDefaultOrigin(img, corners_per_row, corners_per_col);
 }
 
+// -----  requires the coordinates of the 4 checkerboard inner corners (top-left, top-right, bottom-left, bottom-right)
 void STAM::initFromCheckerboard(cv::Mat image, int corners_per_row, int corners_per_col, const std::string& p3D_filename)
 {
     cv::Point3f p3D;  //
@@ -122,13 +126,15 @@ void STAM::initFromCheckerboard(cv::Mat image, int corners_per_row, int corners_
     assert(p2D_vec.size() == corners_per_row*corners_per_col && p2D_vec.size() == p3D_vec.size());
     for (int i = 0; i < p2D_vec.size(); ++i)
     {
+
+        // ======= DEBUG =================
         // std::cout << p2D_vec[i] << std::endl;
 
         //// ----- Visualize chessboard corners ----------------
         // cv::circle(image, p2D_vec[i],10,cv::Scalar(255,0,255),-1);
         // cv::imshow("window",image);
         // cv::waitKey(50);
-        //// ---------------------------------------------
+        //// ============================
 
         auto added_ids = memory_.addCorrespondence(frame->id_, p2D_vec[i], p3D_vec[i]);
         frame->keypoints.push_back( cv::KeyPoint(p2D_vec[i].x, p2D_vec[i].y, 1) );
@@ -155,6 +161,7 @@ void STAM::initFromCheckerboard(cv::Mat image, int corners_per_row, int corners_
 
 }
 
+// ----- does not require the 3d positions of the checkerboard corners. Uses the bottom left inner-corner of the checkerboard as the default origin
 void STAM::initFromCheckerboardDefaultOrigin(cv::Mat image, int corners_per_row, int corners_per_col)
 {
     cv::Point3f p3D;  //
@@ -188,14 +195,15 @@ void STAM::initFromCheckerboardDefaultOrigin(cv::Mat image, int corners_per_row,
     assert(p2D_vec.size() == corners_per_row*corners_per_col && p2D_vec.size() == p3D_vec.size());
     for (int i = 0; i < p2D_vec.size(); ++i)
     {
+
+        // ======= DEBUG =================
         // std::cout << p2D_vec[i] << std::endl;
 
         //// ----- Visualize chessboard corners ----------------
         // cv::circle(image, p2D_vec[i],10,cv::Scalar(255,0,255),-1);
         // cv::imshow("window",image);
         // cv::waitKey(50);
-        //// ---------------------------------------------
-
+        //// ============================
         auto added_ids = memory_.addCorrespondence(frame->id_, p2D_vec[i], p3D_vec[i]);
         frame->keypoints.push_back( cv::KeyPoint(p2D_vec[i].x, p2D_vec[i].y, 1) );
 
