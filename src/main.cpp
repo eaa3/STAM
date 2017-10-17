@@ -59,8 +59,8 @@ int main(int argc, char** argv){
         current_frame = vOdom.process(frame,visualize_flag);
 
 
-        if( SCENE > 1 && i%300 == 0 )
-            vOdom.optimise();
+        // if( SCENE > 1 && i%300 == 0 )
+        //     vOdom.optimise();
 
         i++;
         cv::Mat p;
@@ -80,7 +80,6 @@ int main(int argc, char** argv){
 
     }
     // bundle adjustment
-    vOdom.optimise();
     vOdom.dump();
 
 

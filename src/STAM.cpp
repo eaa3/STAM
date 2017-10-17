@@ -786,20 +786,20 @@ void STAM::projectAndShow(cv::Mat projMatrix, cv::Mat image)
 }
 
 
-void STAM::optimise() {
-    memory_.optimise();
-    updateOptimisedKF();
-}
+// void STAM::optimise() {
+//     memory_.optimise();
+//     updateOptimisedKF();
+// }
 
 void STAM::dump() {
     memory_.dumpMapAndKFExtrinsics();
 }
 
-void STAM::updateOptimisedKF(){
-    auto it = key_frames_.begin();
-    for(;it!=key_frames_.end(); it++)
-        memory_.updateKF(*it);
-}
+// void STAM::updateOptimisedKF(){
+//     auto it = key_frames_.begin();
+//     for(;it!=key_frames_.end(); it++)
+//         memory_.updateKF(*it);
+// }
 
 
 }

@@ -90,119 +90,119 @@ std::pair<int,int> Memory::addCorrespondence(int key_frame_id, int point2d_id, i
     return std::make_pair(p3d_id, p2d_id);
 }
 
-void Memory::optimise() {
-    printf(" Preparing bundle adjustment data!\n");
-    cvsba::Sba sba;
-    std::vector< cv::Point3d > points3D;
-    std::vector< std::vector< cv::Point2d > > pointsImg;
-    std::vector< std::vector< int > > visibility;
-    std::vector< cv::Mat > cameraMatrix, distCoeffs, R, T;
+// void Memory::optimise() {
+//     printf(" Preparing bundle adjustment data!\n");
+//     cvsba::Sba sba;
+//     std::vector< cv::Point3d > points3D;
+//     std::vector< std::vector< cv::Point2d > > pointsImg;
+//     std::vector< std::vector< int > > visibility;
+//     std::vector< cv::Mat > cameraMatrix, distCoeffs, R, T;
 
-    points3D.resize(map_.size());
-    printf(" number of points %lu \n", points3D.size());
-    int i = 0;
-    for(auto p3d_it = map_.begin(); p3d_it != map_.end(); p3d_it++){
-        points3D[i] = p3d_it->second;
-        i++;
-    }
+//     points3D.resize(map_.size());
+//     printf(" number of points %lu \n", points3D.size());
+//     int i = 0;
+//     for(auto p3d_it = map_.begin(); p3d_it != map_.end(); p3d_it++){
+//         points3D[i] = p3d_it->second;
+//         i++;
+//     }
 
-    pointsImg.resize(Rs_.size());
-    visibility.resize(Rs_.size());
+//     pointsImg.resize(Rs_.size());
+//     visibility.resize(Rs_.size());
 
-    printf(" number of keyframes %lu \n", Rs_.size());
+//     printf(" number of keyframes %lu \n", Rs_.size());
 
-    int kf_index = 0;
-    int kf = 0;
-    std::map<int,int> kf_map;
-    for(auto it = projections_.begin(); it != projections_.end(); it++){
+//     int kf_index = 0;
+//     int kf = 0;
+//     std::map<int,int> kf_map;
+//     for(auto it = projections_.begin(); it != projections_.end(); it++){
 
-        auto kf_it = kf_map.find(it->first);
-
-
-        if( kf_it == kf_map.end() ){
-            kf = kf_index++;
-            kf_map.insert(std::make_pair(it->first,kf));
-
-        }
-        else
-        {
-            kf = kf_it->second;
-        }
-
-        //printf("kf_id %d kf_mem_id %d\n", kf, it->first);
+//         auto kf_it = kf_map.find(it->first);
 
 
-        int p3d_id = it->second.first;
-        int p2d_id = it->second.second;
+//         if( kf_it == kf_map.end() ){
+//             kf = kf_index++;
+//             kf_map.insert(std::make_pair(it->first,kf));
 
-        if( !pointsImg[kf].size() ) {
-            pointsImg[kf].resize( map_.size() );
-            visibility[kf].resize( map_.size(), 0);
-        }
+//         }
+//         else
+//         {
+//             kf = kf_it->second;
+//         }
 
-        visibility[kf][p3d_id] = 1;
-        pointsImg[kf][p3d_id] = points2D_[p2d_id];
-    }
-    printf("projSize %lu\n", pointsImg.size());
-
-    printf(" number of keyframes %lu \n", kf_map.size());
-    cameraMatrix.resize( kf_map.size() );
-    distCoeffs.resize( kf_map.size() );
-    R.resize(kf_map.size() );
-    T.resize(kf_map.size() );
-    for(auto it =  kf_map.begin(); it != kf_map.end(); it++){
-
-        //printf("accessing RT pos %d\n", it->second);
-
-        R[it->second] = Rs_[it->first];
-        T[it->second] = Ts_[it->first];
+//         //printf("kf_id %d kf_mem_id %d\n", kf, it->first);
 
 
-        distCoeffs[it->second] = dist_coeff_list[it->first];
-        cameraMatrix[it->second] = cam_matrix_list[it->first];
-    }
-    printf(" input size R T %lu %lu\n", R.size(), T.size());
+//         int p3d_id = it->second.first;
+//         int p2d_id = it->second.second;
 
-//    double Sba::run (  std::vector<cv::Point3d>& points,
-//                       const std::vector<std::vector<cv::Point2d> >& imagePoints,
-//                       const std::vector<std::vector<int> >& visibility,
-//                       std::vector<cv::Mat>& cameraMatrix,
-//                       std::vector<cv::Mat>& R,
-//                       std::vector<cv::Mat>& T,
-//                       std::vector<cv::Mat>& distCoeffs );
+//         if( !pointsImg[kf].size() ) {
+//             pointsImg[kf].resize( map_.size() );
+//             visibility[kf].resize( map_.size(), 0);
+//         }
 
-//    points: vector of estimated 3d points (size N).
-//    imagePoints: (input/[output]) vector of vectors of estimated image projections of 3d points (size MxN). Element imagePoints[i][j] refers to j 3d point projection over camera i.
-//    visibility: [input] same structure and size than imagePoints (size MxN). Element  visibility[i][j] is 1 if points[j] is visible on camera i. Otherwise it is 0. No-visible projections are ignored in imagePoints structure.
-//    cameraMatrix: (input/[output]) vector of camera intrinsic matrixes (size N). Each matrix consists in 3x3 camera projection matrix.
-//    R: (input/[output]) vector of estimated camera rotations (size N). Each rotation is stored in Rodrigues format (size 3).
-//    T: (input/[output]) vector of estimated camera traslations (size N).
-//    distCoeffs: (input/[output]) vector of camera distortion coefficients (size N). Each element is composed by 5 distortion coefficients.
-//    Return value:  the projection error obtained after the optimization.
+//         visibility[kf][p3d_id] = 1;
+//         pointsImg[kf][p3d_id] = points2D_[p2d_id];
+//     }
+//     printf("projSize %lu\n", pointsImg.size());
 
-    cvsba::Sba::Params params = sba.getParams();
-    params.type = cvsba::Sba::MOTION;
-    params.fixedDistortion=5;
-    params.fixedIntrinsics=5;
-    params.verbose = false;
-    sba.setParams(params);
-    printf("Running Bundle Adjustment! \n");
-    sba.run(points3D,  pointsImg,  visibility,  cameraMatrix,  R,  T, distCoeffs);
-    printf("Bundle Adjustment FINISHED! \n");
-    std::cout<<"Initial error="<<sba.getInitialReprjError()<<". Final error="<<sba.getFinalReprjError()<<std::endl;
+//     printf(" number of keyframes %lu \n", kf_map.size());
+//     cameraMatrix.resize( kf_map.size() );
+//     distCoeffs.resize( kf_map.size() );
+//     R.resize(kf_map.size() );
+//     T.resize(kf_map.size() );
+//     for(auto it =  kf_map.begin(); it != kf_map.end(); it++){
 
-    for(auto it =  kf_map.begin(); it != kf_map.end(); it++){
+//         //printf("accessing RT pos %d\n", it->second);
 
-        //printf("accessing RT pos %d\n", it->second);
-
-        Rs_[it->first] = R[it->second];
-        Ts_[it->first] = T[it->second];
-    }
-
-    // TODO: Update map using points3D
+//         R[it->second] = Rs_[it->first];
+//         T[it->second] = Ts_[it->first];
 
 
-}
+//         distCoeffs[it->second] = dist_coeff_list[it->first];
+//         cameraMatrix[it->second] = cam_matrix_list[it->first];
+//     }
+//     printf(" input size R T %lu %lu\n", R.size(), T.size());
+
+// //    double Sba::run (  std::vector<cv::Point3d>& points,
+// //                       const std::vector<std::vector<cv::Point2d> >& imagePoints,
+// //                       const std::vector<std::vector<int> >& visibility,
+// //                       std::vector<cv::Mat>& cameraMatrix,
+// //                       std::vector<cv::Mat>& R,
+// //                       std::vector<cv::Mat>& T,
+// //                       std::vector<cv::Mat>& distCoeffs );
+
+// //    points: vector of estimated 3d points (size N).
+// //    imagePoints: (input/[output]) vector of vectors of estimated image projections of 3d points (size MxN). Element imagePoints[i][j] refers to j 3d point projection over camera i.
+// //    visibility: [input] same structure and size than imagePoints (size MxN). Element  visibility[i][j] is 1 if points[j] is visible on camera i. Otherwise it is 0. No-visible projections are ignored in imagePoints structure.
+// //    cameraMatrix: (input/[output]) vector of camera intrinsic matrixes (size N). Each matrix consists in 3x3 camera projection matrix.
+// //    R: (input/[output]) vector of estimated camera rotations (size N). Each rotation is stored in Rodrigues format (size 3).
+// //    T: (input/[output]) vector of estimated camera traslations (size N).
+// //    distCoeffs: (input/[output]) vector of camera distortion coefficients (size N). Each element is composed by 5 distortion coefficients.
+// //    Return value:  the projection error obtained after the optimization.
+
+//     cvsba::Sba::Params params = sba.getParams();
+//     params.type = cvsba::Sba::MOTION;
+//     params.fixedDistortion=5;
+//     params.fixedIntrinsics=5;
+//     params.verbose = false;
+//     sba.setParams(params);
+//     printf("Running Bundle Adjustment! \n");
+//     sba.run(points3D,  pointsImg,  visibility,  cameraMatrix,  R,  T, distCoeffs);
+//     printf("Bundle Adjustment FINISHED! \n");
+//     std::cout<<"Initial error="<<sba.getInitialReprjError()<<". Final error="<<sba.getFinalReprjError()<<std::endl;
+
+//     for(auto it =  kf_map.begin(); it != kf_map.end(); it++){
+
+//         //printf("accessing RT pos %d\n", it->second);
+
+//         Rs_[it->first] = R[it->second];
+//         Ts_[it->first] = T[it->second];
+//     }
+
+//     // TODO: Update map using points3D
+
+
+// }
 
 void Memory::updateKF(Frame::Ptr keyframe){
 

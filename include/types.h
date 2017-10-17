@@ -138,7 +138,7 @@ public:
 
     void updateKF(Frame::Ptr keyframe);
 
-    void optimise();
+    // void optimise();
 
 
 };

@@ -9,12 +9,12 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake_mod
  
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/include")
 
-#########################################################
-# FIND OPENCV AND SPARSE BUNDLE ADJUSTMENT PACKAGE
-#########################################################
+################
+# FIND OPENCV
+################
 find_package( OpenCV REQUIRED )
 
-find_package(cvsba REQUIRED )
+# find_package(cvsba REQUIRED )
 
 find_package( Eigen3 REQUIRED ) # for rot matrix to quaternion conversion
 include_directories( ${EIGEN3_INCLUDE_DIR} )
@@ -37,7 +37,7 @@ include_directories( ${STAM_INC} )
 #     )
 
 set(STAM_LIBS "${STAM_SRC_DIR}/STAM.cpp"
-                "${STAM_SRC_DIR}/cvsba_simple_test.cpp"
+                # "${STAM_SRC_DIR}/cvsba_simple_test.cpp"
                "${STAM_SRC_DIR}/types.cpp"
                "${STAM_SRC_DIR}/utils.cpp"
                "${STAM_SRC_DIR}/VideoSource.cpp"
@@ -49,11 +49,11 @@ add_library( vostam SHARED ${STAM_LIBS})
 add_executable( demo ${STAM_SRC_DIR}/main.cpp )
 
 # add_executable(cvsba_simple_test ${STAM_SRC_DIR}/cvsba_simple_test.cpp)
-target_link_libraries(demo ${OpenCV_LIBS} ${cvsba_LIBS} vostam)
+target_link_libraries(demo ${OpenCV_LIBS} vostam)
 
 # target_link_libraries(cvsba_simple_test ${OpenCV_LIBS} ${cvsba_LIBS})
 
-target_link_libraries(vostam ${OpenCV_LIBS} ${cvsba_LIBS} ${Eigen3_LIBS})
+target_link_libraries(vostam ${OpenCV_LIBS} ${Eigen3_LIBS})
 
 # target_link_libraries(demo ${OpenCV_LIBS} ${cvsba_LIBS})
 

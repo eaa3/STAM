@@ -32,7 +32,6 @@
 
 #include <algorithm>
 
-#include <cvsba/cvsba.h>
 namespace vo_utils = visual_odometry::utils;
 
 extern int SCENE;
@@ -78,7 +77,7 @@ public:
     {
         return distortion_;
     }
-    void optimise();
+    // void optimise();
     void dump();
     std::list<Frame::Ptr> key_frames_;
 
@@ -110,7 +109,7 @@ private:
 
     void projectAndShow(cv::Mat projMatrix, cv::Mat image);
 
-    void updateOptimisedKF();
+    // void updateOptimisedKF();
 
 
     Frame::Ptr previous_frame_;
