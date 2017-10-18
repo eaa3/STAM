@@ -12,7 +12,6 @@ This is the modified version of STAM implementation for providing visual odometr
 ### Dependencies ###
 
 * OpenCV 2.4.x
-* cvsba (https://www.uco.es/investiga/grupos/ava/node/39)
 * LAPACK (https://pheiter.wordpress.com/2012/09/04/howto-installing-lapack-and-blas-on-mac-os/)
 
 
