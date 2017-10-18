@@ -15,24 +15,7 @@ This is the modified version of STAM implementation for providing visual odometr
 * LAPACK (https://pheiter.wordpress.com/2012/09/04/howto-installing-lapack-and-blas-on-mac-os/)
 
 
-### Installing dependencies on OSX ###
-
-* opencv 2.4.x
-  * ``brew tap homebrew/science``
-  * `` brew install opencv ``
-* f2c
-  * ``brew install --HEAD homebrew/boneyard/f2c``
-* cvsba
-  * Download, make and install csvba: https://www.uco.es/investiga/grupos/ava/node/39
-  
-### Installing dependencies on Ubuntu ###
-
-* cvsba
-  * Follow UNIX instructions at https://www.uco.es/investiga/grupos/ava/node/39
-
-
-
-### Building STAM Linux/OSX ###
+### Building STAM Linux ###
 
 ````
 git clone -b graphslam_mod https://github.com/eaa3/STAM.git
