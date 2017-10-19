@@ -11,6 +11,7 @@
 
 #include "types.h"
 #include <stdio.h>
+#include <cvsba/cvsba.h>
 #include <fstream>
 
 namespace visual_odometry {
